@@ -1,0 +1,251 @@
+SFML NOTES
+-------------------------------------
+
+sf::Window(sf::VideoMode(width, height), Name)
+
+	- this creates a window, window requires two parameters. one sf::VideoMode(x, y) and one Name
+	- sf::VideoMode(x, y) specifies the inner size of the window	- bpp / depth / bits per pixel specifies the bits given to each pixel. It is a parameter than can be used in videomode.
+	Also third parameter that allows to add a style rules to the window, by 
+	sf::Style::(
+
+	None - no decorations
+	Titlebar - TitleBar
+	Resize - resizable
+	Close - has a close button
+	Fullscreen - shown in full screen mode
+	Default - titlebar, resizable, close
+
+	)
+
+declaration: 
+
+	sf::Window window;
+	// can be declared like this
+	window.create(sf::VideoMode(x, y), "Title");
+	// or
+	sf::Window window(sf::VideoMode(x, y), "title");
+	
+
+Event Handling
+-----------------------------------
+This is needed to keep the window alive. 
+
+- window.IsOpen() return true if the window is open and false if not.
+
+to make the main loop 
+
+while(window.IsOpen()) this automatically refreshes the window whilst it has not been closed. 
+
+
+sf::Event event creates an empty event
+
+window.pollEvent(event) takes the prior event and returns true if there is an event that is pending, if the event is assigned to the event that is passed. 
+
+Events
+-------------------------
+
+sf::Event can only be created using window.pollEvent(event) or window.waitEvent(event)
+
+Closed Event
+
+sf::Event::Closed --> this is just a close request so the window must be closed by code
+
+sf::Event::Resized --> this event is triggered when the window is resized
+	- use event.size.width or event.size.height to get new width and height.
+
+sf::Event::LostFocus --> triggered when window loses focus (when it doesnt recieve keyboard inputs)
+
+sf::Event::GainedFocus --> triggered when window gains focus
+
+sf::Event::TextEntered --> triggered when text is entered, uses contextual rules to create a unicode character
+	- text can be accessed by, event.text.unicode
+	- as backspace is one unicode, maybe should be filtered out
+
+sf::Event::KeyPressed --> triggered when key is pressed
+
+sf::Event::KeyReleased --> triggered when key is released
+
+If a key is held, multiple sf::Event::KeyPressed's are triggered.
+to disable holding of a key, use 
+window.setKeyRepeatEnabled(true)
+this also means you cant press ff or bb.
+
+you can access the key pressed by using 
+	event.key
+		.scancode
+		.code
+		.(modifier keys)
+
+the scan code are unique to the physical location of the key 
+the key code is unique to the actual key being pressed
+
+sf::Event::MouseWheelScrolled --> triggered when mouse is scrolled
+	- using event.mouseWheelScroll.wheel can be checked to see if the wheel is vertical or horizontal by comparing to
+
+	sf::Mouse::HorizontalWheel
+			 ::VerticalWheel
+
+	- you can get the ticks/ the amount the wheel has scrolled.
+	by using 
+		event.mouseScrollWheel.delta
+
+	- to get position of the mouse
+		event.mouseScrollWheel.x
+							  .y
+
+sf::Event::MouseButtonPressed --> triggered when mouse is pressed
+sf::Event::MouseButtonReleased --> triggered when mouse is released
+- can check which button clicked by using 
+		event.mouseButton.button == sf::Mouse::Right
+											 ::Left
+											 ::Middle
+
+sf::Event::MouseMoved --> triggered when the mouse moves WHEN the mouse moves in the range of the window. the window does not have to be in focus.
+
+	- can be accessed using event.mouseMove.x
+										   .y
+
+sf::Event::MouseEntered --> triggered when mouse moves in the area of the window
+
+sf::Event::MouseLeft --> triggered when mouse leaves the area of the window
+
+Input/Output - Keyboard, mouse, etc. 
+-------------------------------------
+
+global input devices (keyboard, mouse, joystick) allows you to query state of a key
+
+event notify when something happens (button press / key held down)
+
+KEYBOARD
+-------+
+
+sf::KeyBoard 
+
+sf::KeyBoard::isKeyPressed(sf::Keyboard::$KEY) --> this returns true when the key specified has been pressed. This is a static function. This also ignores if the window is in focus or not. 
+
+MOUSE
+-----+
+
+sf::Mouse --> only contains static functions so does not need to be initialized
+
+sf::Mouse::isButtonPressed(sf::Mouse::$KEY) --> triggered when mouse button is clicked.
+
+sf::Mouse::getPosition() --> gets coordinates of the mouse relative to desktop 
+
+sf::Mouse::getPosition(window) --> get coordinates of the mouse relative to the window
+	- window must be sf::Window
+
+sf::Mouse::setPosition(sf::Vector2i(x, y)) --> set position of mouse to (x, y) relative to desktop
+
+sf::Mouse::setPosition(sf::Vector2i(x, y), window) --> set position of mouse to (x, y) relative to window 
+
+DRAWING 
+-------------------------
+To draw things on the screen you must use 
+
+sf::RenderWindow, this inherits from sf::Window so all functionalities remain. 
+
+window.clear(sf::Color::$COLOR) --> replaces the whole window with one singular color
+
+clear has to be called every time as otherwise the previous frame will still remain
+
+window.display() --> displays all the buffered drawings
+	- when you do window.draw, it gets stored in a buffer,
+	then when you call window.display all items in the buffer
+	are drawn onto the screen
+
+BEST CYCLE TO FOLLOW: 
+clear --> draw --> display
+
+SPRITES
+---------------+
+
+Texture is an image that is mapped onto an entity, once this occurs the entity becomes a sprite.
+
+sf::Sprite sprite --> creates a sprite object
+sprite.setTexture(sf::Texture) --> draws the texture onto the sprite
+window.draw(sprite) --> draws the sprite
+
+sprite.setTextureRect(sf::IntRect(x, y, px, py)) --> set the texture rectangle for the sprite.
+
+sprite.setColor(sf::Color(R, G, B, A)) --> this sets the multiplies the colour of the texture with the colour and set that colour to the sprite
+	- A stands, for alpha / transparrency, all values are out of
+
+sprite.setPosition(sf::Vector2f(x, y)) --> sets position of sprite to (x, y)
+
+sprite.move(xf, yf) --> moves the sprite relative the where it is.
+
+sprite.setRotation(anglef) --> sets the original rotation of the sprite
+
+sprite.rotate(anglef) --> rotates sprite the by the specified angle
+
+sprite.setScale(sf::Vector2f(xf, yf)) --> scales sprite in x and y directions, scale factor of x and y. 
+
+sprite.scale(sf::Vector2f(xf, yf)) --> scales sprite
+
+sprite.setOrigin(sf::Vector2f(xf, yf)) --> sets the origin poin t of the sprite. 
+	- this is original set at the top left of the sprite
+
+PERFORMANCE TIP* Use as little textures as possible
+
+FONTS AND TEXT
+----------------------------------
+sf::Font font 
+font.loadFromFile($file.ttf)
+	- you need to include the font folder in your application 
+
+sf::Text text
+
+text.setFont(sf::Font) --> sets the font of the text
+
+text.setString("Hello World") --> sets the text 
+
+text.setCharacterSize(int) --> sets how big each character is in pixels 
+
+text.setFillSize(sf::Color::$color) --> sets the color of the character 
+
+text.setStyle(sf::Style::$style1 | sf::Sytle::$style2) --> sets the style rulews of the text
+
+To draw the text do, window.draw(sf::Text)
+
+
+
+Textures
+---------
+
+sf::Texture texture --> texture object
+
+texture.loadFromFile("image.png") --> loads a texture from a file
+
+texture.loadFromFile("image.png", sf::IntRect(10, 10, 32, 32)) --> loads the texture, but uses a smaller part of the image
+	- starts at (10, 10), and loads a 32x32 rectangle
+
+texture.create(x, y) --> creates a blank texture of size (x, y)
+
+texture.update(sf::Uint8*) 
+			   sf::Image
+
+texture cna be update using array of pixels or an Image 
+array of pixels must be width*height*4, 4=RGBA
+texture.setSmooth(true/false) --> makes the image look "smoother" but may make the image more blurry.
+
+texture.setRepeated(true/false) --> says if the texture can be rpeated in for the entity
+
+
+
+Extra Window Functions 
+-------------------------
+
+window.setTitle("NewTitle"); -> changes the title
+window.getSize() -> returns a sf::Vector2u
+sf::Vector2u has x, and y values which can be accessed by using .x and .y
+
+Framerate 
+---------
+
+window.setVerticalSyncEnabled(true/false) -> this turns on vsync for the user. 
+
+window.setFramerateLimit(60, 120) -> sets the framerate maximum. 
+NEVER USE BOTH PICK ONE.
+
+

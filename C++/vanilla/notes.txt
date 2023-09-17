@@ -1,0 +1,359 @@
+HEADER FILES AND IMPORTING FROM ANOTHER LIBRARY
+------------------------------------------------
+
+FILE STRUCTURE
+------------------------
+
+main.cpp
+includes/
+  functions.cpp
+
+
+you can use 
+
+#include "path/to/file.cpp" --> this way we can include all the functionalities of the file.cpp file
+  - This is bad practice however due to two reasons
+  1. Sometimes you will want to keep file.cpp's source code hidden.
+  2. It is not the convention thus code can become unclear.
+
+
+One way to solve the problem number one, is to use header files. These are placed in the same directory of the files and have the same name, but have the extension
+.hpp or .h. --> file.hpp / file.h, also this should be the in the include in the main.cpp file
+
+The header file contains all the function definitions of the cpp file, but does not contain the implementations of the functions but the documentation on how to use
+the functions. The header file should also have the same includes of the cpp file.
+
+To compile the files together we need to also specify that we want to compile the file.cpp to do this we need a command like:
+
+  g++ -o out main.cpp includes/functions.cpp
+
+  the -o command specifies the output
+  then we specify the two files we want to compile together into the ./out executable.
+
+PREPROCESSOR STATEMENT 
+
+statements that are preprocessed before anything else, this is shown in #include statements, essiently copies and pastes all information specified in the include
+statement
+
+this is also in define statements, 
+
+MAIN FUNCTION
+--------------------------
+
+  First function to be run. must return an int. If main returns 0 then program successfully executed, and if returns
+  1, then program unsuccessfully executed.
+
+SEGMENTATION FAULT / SEG FAULT
+-----------------------------
+
+When a program tries to access a memory address that it doesnt have access to.
+
+e.g: 
+  - referencing a null pointer
+
+CREATING A DYNAMIC ARRAY FROM HEAP
+----------------------------------
+
+int* dynamicArray = new int[5];
+
+dynamicArray is a pointer to a array of length 5, that has been created in the heap.
+
+GARBAGE/INDETERMINATE VALUES
+-----------------------------
+if we declare an array of size 5, e.g:
+
+  int Array[5];
+
+this does not initialise the array, thus currently the array is full of garbage and indeterminate values, this is random values that are in memory that are marked
+as unused.
+
+so thus to use an array properly, do 
+
+  int Array[5] = {0, 0, 0, 0, 0};
+
+if you dont, Array[3] could equal to 59328319 or any value, which makes the program unusable.
+
+DEREFERENCING POINTERS
+---------------------------------------------
+
+These are ways to access a value of a element that a pointer is pointing to.
+
+1. * Operator, used in elementary data types
+
+	int V = 5;
+	int* pV = &V;
+
+	cout << *pV;
+	
+2. -> Operator, used in classes or structs
+
+	class Node{
+		int Data;
+
+		Node(int D){
+			Data = D;
+		}
+	}
+
+	Node newNode(4);	
+	Node* pN = &newNode;
+
+	cout << pN->Data;
+
+OBJECT LIFECYCLE DURATION
+--------------------------------------
+
+~pertains to what happens to objects after being created in a local function.
+
+1. Automatic Storage Duration
+	- if object is created in a local function without the keyword new, its lifecycle is during the execution of the function.
+	thus it will be destroyed after the function is executed. Thus the memory that was assinged to the object is reclaimed
+
+	void Func(){
+		myObj obj;
+		
+	} // obj will be destroyed.
+	
+
+2. Dynamic Storage Duration
+	- if object is created in a local function WITH the new keyword, it will remain until it is deleted with the delete keyword. 
+
+	void Function(){
+		myObj obj = new Obj;
+		
+		// obj will remain even after function is completed.
+	}
+
+	- The only way to get rid of the object is to use
+
+	delete obj;
+
+3. Returning an Object from a function
+
+	- If a object is returned from a function then a copy of the object will remain and be sent to the caller of the function, the 
+	original object will be destroyed. 
+
+	myObj Function(){
+		myObj obj = new Obj;
+
+		return obj;
+	}
+	
+
+NEW AND DELETE KEYWORDS
+-------------------------------------
+
+new --> allocate memory from heap to objects or arrays dynamically at runtime, RETURNS A POINTER OF where object is stored.
+
+delete --> deallocate dynamic memory from the heap, delete is to be used on the pointer, delete also calls the deconstructor. 
+
+DECONSTRUCTOR 
+---------------------------------------
+this is a special function which is called when a object is destroyed or goes out of scope 
+
+Declared as 
+
+class MyObj{
+	private:
+	public:
+		MyObj(){
+			// Constructor
+			}
+
+		~MyObj(){
+			// Destructor
+		}
+
+}
+
+Structs
+--------------------------
+
+struct MyStruct{
+	int i;
+	char c;
+	float f;
+}
+
+Structs are used to represent classic data structures they are similiar to classes but all members are automatically public. 
+
+Unions
+---------------------------------------
+Like a struct, only occupies one member at a time.
+
+union{
+
+	float a;
+	int b;
+};
+
+a and b share the same memory address, this can also be used in type punning. 
+
+
+Type Punning
+----------------
+Accessing or referencing memory of a object through a type different then the one defined as.
+
+This may lead to unpredictable results as it may violate type safety.
+o
+
+Example: 
+
+	int a = 5;
+	double a = *(double*)&a
+
+we convert the integer pointer to a double pointer and then dereference it to convert a to a double.
+
+shouldnt be used for two types with different amounts of memory.int = 4, double = 8
+
+SINGLETONS
+----------------
+
+Singletons are for ensuring that there is only one object of that class 
+
+1. make constructor private
+2. add a static pointer as a private variable
+3. add a get instance function to create or return the singlton instance
+	- do this by checking if the static pointer is null or not
+
+Ensures lazy instantiation, creates objects only when it is needed
+
+FACTORIES
+-----------
+
+Created based on singletons
+
+Remove how objects are created from client, client only uses the API to request some functions.
+
+Factories create classes for the user. 
+
+1. Create a class for the factory make it a singleton 
+2. Create an abstract parent class for the classes that you want to create. (these sub-classes should inherit from the abstract class)
+3. Create a function that returns a pointer to the abstract class in the factory 
+
+INTERFACES PURE VIRTUAL FUNCTION 
+---------------------
+
+Classes that have only the declerations of functions, subclasses have to add definitions.
+
+
+class IHouse {// Interfaces are generally specified with capital I
+	virtual int return_number() = 0; // Has to be implemented in subclass
+
+}
+
+CONST Keyword
+------------------
+
+const keyword makes it so that you cannot change the defined variable
+
+const int a = 5; 
+
+a = 2; // is now illegal due to const keyword
+
+const int* a = new int; 
+int const* a = new int; // this is the same thing
+
+this means that you cannot modify the contents of the pointer, but you can reassign the actual pointer 
+
+int* const a = new int; 
+
+this means you can change the contents of the pointer, but you cant reassign or modify the pointer
+
+const int* const a = new int; 
+
+this means you cant modify the contents of the pointer and you cannot reassing or modify the pointer 
+
+// const in class
+
+class myclass{
+	int x;
+	int getX() const
+	{
+		return x; 
+	}
+}
+
+in this application const means that the function cannot modify anything about the class variables. 
+
+SMART_POINTERS
+------------------
+
+wrapper around a raw pointer which automatically gets deallocated.
+
+need to #include <memory> to access smart pointers
+
+Unique pointer -> pointer that cannot be shared/copied
+	std::unique_ptr<type> name(new type());
+
+	or
+
+	std::unique_ptr<type> name = std::make_unique<type>();
+
+Shared pointer -> pointer that can be shared, and is only destroyed when no references to that memory occur
+	std::shared_ptr<type> name = std::make_shared<type>();
+
+Weak pointer -> a pointer that can be used like shared, but doesnt incriment the references count
+	std::weak_ptr<type> name = std::make_weak
+
+
+
+CONSTRUCTOR INITIALIZER LIST
+----------------------------
+
+way to set default values for the constructor used to essentially remove clutter in the constructor
+this is usefull as it only creates on object
+
+class Object{
+	int hello
+
+	Object()
+		:hello(14)
+	{
+	}
+}
+
+class Example{
+	Object temp; (1)
+	Example(){
+		temp = Object(); (2)
+	}
+}
+
+// this is wasteful as it creates two objects, (1) and (2)
+
+class Example{
+	Object temp;
+	Example()
+		:temp() (1)
+	{
+	}
+};
+
+using a constructor initializer list it only creates one object.
+
+HOW TO ACCEPT UNKNOWN AMOUNT OF PARAMETERS
+-------------------------------------------
+
+#include <initializer>
+
+void func(std::initializer_list<type> listname){
+	// now listname is a list of type's
+}
+
+to call the function now 
+
+func({obj1, obj2, obj3})
+
+INLINE FUNCTIONS
+--------------------
+
+inline - keyword used in functions to automatically replace the function call, with the actual source
+		code of the function where it was called
+
+inline void fun(int a){
+	std::cout << a << std::endl;
+}
+
+
+fun(10); --> this is subtituted with: std::cout << 10 << std::endl;

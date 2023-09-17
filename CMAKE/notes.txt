@@ -1,0 +1,33 @@
+Start by creating a CMakeLists.txt in the start of the directory.
+
+1. touch CMakeLists.txt in current dir
+2. create folders out/build
+3. cmake -S . -B out/build 
+	- -S specifies where our source folder is, where CMakeLists.txt is
+	- -B specifies where our build folder is
+	
+(3) Now out/build has somefiles DO NOT TOUCH ANY OF THEM, only touch CMAKELISTS.TXT
+
+cmake_minimum_required(VERSION x.x.x) --> specifies minimum version of cmake to use. 
+	- use cmake --version to get the version you currently use. e.g: 3.26.4
+
+project(name) --> sets a name to your project 
+	- project name can be accessed using ${PROJECT_NAME} ==> SQUARE BRACKETS
+
+add_executable(nameOfExe src.cpp) --> creates an executable of src.cpp called nameOfExe
+
+4. GO to build folder and run make
+
+install(TARGETS executable DESTINATION bin) --> the executable must be an executable specifed with add_executable, the bin installs it in /usr/local/bin which means after properly installing, we can call executable anywhere and the program will run 
+
+add_library(name src.cpp) --> you can specify more than one src.cpp file
+	-> this outputs a libname.a library file
+
+target_link_libraries(nameofexe library) -->this will link the library to your program, the library is either .so or .a the extension doesnt matter, name of exe is the executable createdwith add_executable()
+	
+you also need to link the file of where the library is stored. to do so use command
+
+target_link_directories(nameofexe PUBLIC/PRIVATE path/to/lib) 
+	-> use ${CMAKE_SOURCE_DIR} to get to the source directory of where cmakelists resides in 
+
+:
