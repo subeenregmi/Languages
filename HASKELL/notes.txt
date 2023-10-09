@@ -25,9 +25,14 @@ Dont use floats in ranges as they can result into lost precision
 
 Use tuples when you know how much elements go into the tuple and if they vary in types.
 
+If you want to find out the type of a infix operator you have to use parenthesis to surround the operator.
+
+
 FUNCTIONS/KEYWORDS
 -------------------
 succ {int} -> function that returns the next element after the provided parameter, e.g: succ 8 == 9
+
+pred {int} -> function that returns the previous element befroe the provided element, only works when the element has an instance of the Enum typeclass 
 
 min {num1} {num2} -> function that returns the lesser of the two numbers, e.g: min 3 5 == 3
 
@@ -89,6 +94,21 @@ snd {pair_tuple} -> returns the second itme in a tuple of two items.
 
 :t {a} -> returns type of a
 
+show {a} -> prints out stringified version of a
+
+read {string} -> returns the object the string represent, this is used with another member of the string represented class
+
+	e.g read "5" - 3
+
+	or you can declare the type
+
+	read "5" :: Int
+
+minBound :: {type} -> if type is in the Bounded typeclass, this will return its lower limit
+
+maxBound :: {type} -> if type is in the Bounded typeclass, this will return its upper limit
+
+fromIntegral {Integral} -> returns a more general number which can be used in more context.
 IF THEN ELSE
 -----------------
 
@@ -264,3 +284,26 @@ String -> [Char], list of characters
 Type variable, allow for functions to handle any types. They are denoted using lower case starting letters.
 
 Functions that use type variables are polymorphic.
+
+Typeclasses
+------------
+
+Interface that a type choses to implement
+
+:t (==)
+	(==) :: Eq a => a -> a -> Bool
+
+the "Eq a" means that a has to be a member of the Eq class.
+
+Common typeclasses:=
+
+- Eq : used for types that support equality
+- Ord : used for types that can be ordered in some way
+- Show : used primarily for the function show, which displays the information as a string
+- Read : used to turn a string into a variable of that type, use function read.
+- Enum : Using the enums to be able to enumerate through a list
+- Bounded : types that are bounded to some limits
+- Num : types that act like numbers, e.g: Int, Integer, Double, Float
+- Integral: only includes whole numbers
+- Floating: only includes floating point numbers
+
