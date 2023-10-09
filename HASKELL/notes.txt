@@ -1,0 +1,266 @@
+Boolean Conditions/Operators 
+
+True, False
+&& - and 
+|| - or 
+/= - not equals to 
+== - equals to
+not (_) - nots the conditions 
+
+DEFINITIONS AND INTERESTING STUFF
+---------------------------------
+
+Infix function - a function that is sandwiched between two operands
+Prefix function - a function where parameters come after the function
+
+Function Application - Passing paramaters to a function (this has the highest precidence when using functions in statements)
+
+Functions cannot start with CAPITAL Letters
+Use of ' is valid for function naming
+If a function name ends with ' this means that the function isnt lazy or has been modified form the original. 
+
+Strings are just a list of characters. 
+
+Dont use floats in ranges as they can result into lost precision
+
+Use tuples when you know how much elements go into the tuple and if they vary in types.
+
+FUNCTIONS/KEYWORDS
+-------------------
+succ {int} -> function that returns the next element after the provided parameter, e.g: succ 8 == 9
+
+min {num1} {num2} -> function that returns the lesser of the two numbers, e.g: min 3 5 == 3
+
+max {num1} {num2} -> function that returns the greater of the two numbers, e.g: max 2 5 == 5
+
+let (expression) -> this is used in ghci to store a value.
+
+head {list} -> returns the first element of a list
+
+tail {list} -> returns all elements that are not the head.
+
+last {list} -> returns the last element of a list
+
+init {list} -> returns all elements without the last element
+
+length {list} -> returns length of a list
+
+null {list} -> returns true if the list is empty 
+	e.g: null [2, 3, 4] == False
+		 null [] == True
+
+reverse {list} -> reverses a given list
+
+take {items} {list} -> extracts that many items from the start of the list
+
+drop {items} {list} -> removes the number of items from the start of the list and returns the remaining items
+
+maximum {list} -> returns the max item in a list
+minimum {list} -> returns the min item in a list
+
+sum {list} -> returns the sum of all the elements in a list 
+product {list} -> returns the products of all elements in a list
+
+elem {item} {list} -> returns true or false whether item is in a list
+	e.g: elem 5 [1, 2, 5] == True
+		 elem 6 [1, 2, 5] == False
+		 5 `elem` [1, 2, 5] == True
+
+cycle {list} -> returns an infinite list of repeated concatenated lists
+
+	e.g: cycle [1, 2, 3] == [1, 2, 3, 1, 2, 3, 1, 2, 3, ...]
+
+repeat {item} -> returns an infinite list consisting of only the item provided
+
+	e.g: repeat 3 == [3, 3, 3, 3, 3, 3, 3, 3, ..]
+
+replicate {amount} {item} -> returns a list of the same item repeated a given amount of times.
+
+odd {item} -> returns True if item is odd.
+
+_ -> use of this keyword means that we dont want to access this value
+
+	e.g: [1 | _<-[1..10]] == [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+	We cant access the number in _.
+
+fst {pair_tuple} -> returns the first item in a tuple of two items.
+
+snd {pair_tuple} -> returns the second itme in a tuple of two items.
+
+:t {a} -> returns type of a
+
+IF THEN ELSE
+-----------------
+
+if (condition) then (result) else (default)
+	- Else here is mandatory
+
+LISTS
+---------
+Homogenous meaning that all elements have to have the same type.
+
+	e.g: a = [1, 2, 3, 4]
+
+To concatenate two lists use ++ operator in between the lists.
+
+	a = [1, 2, 3, 4]
+	b = [5, 6]
+
+	a ++ b // [1, 2, 3, 4, 5, 6]
+
+The ++ operator can get slow on larger sized lists, but using : to prepend to a list is instant. 
+Note: you can only prepend an element onto a list, not an actual list
+tldr: ++ operator takes two lists of the same type and concatenates them, : operator takes a list of elements and an element of that list to add it onto the start
+
+	a = [1, 2, 3, 4]
+	b = 5
+
+	b : a // [5, 1, 2, 3, 4]
+
+[] -> empty set
+
+a = [1, 2, 3] is just equal to 1 : 2 : 3 : []
+
+To index a list use !! operator
+
+	e.g: a = [1, 2, 3]
+	a !! 1 == 2
+
+Lists of Lists:
+
+	a = [[1, 2], [3, 4], [5, 6]]
+
+They can be indexed by using !! twice.
+
+	a !! 1 !! 1 == 4
+
+List Equalities: First the head is compared, and if they are equal then the second elements are compared, and this goes on until the equality is satisfied to be true or false.
+
+	[3, 4, 5] > [3, 5, 4] == False
+
+RANGES
+----------
+
+A way to generate a list of items that can be enumarated. 
+
+	a = [1..6] 
+	a = [1, 2, 3, 4, 5, 6]
+
+This works on numbers, characters and elements that have a successor.
+
+	a = ['a'..'z']
+	a = {alphabet}
+	// Here the output will look like a string of the alphabet, the reason this is the case is because a string is a list of characters.
+
+	a = [5..10]
+	a = [5, 6, 7, 8, 9, 10]
+	
+Ranges can also include a steps
+
+	a = [1, 3..20]
+	a = [1, 3, 5, 7, 9, 11, 13, 15, 17, 19]
+
+Steps are only expressed in the first and the second elements.
+
+	a = [1, 2, 4, 8..20]
+	This leads to an error, as you can only have one step 
+
+Steps can be defined to go back 
+
+	a = [5, 4..0]
+	a = [5, 4, 3, 2, 1, 0]
+
+Ranges can be used to create infinite number of elements, this is done by not specifying an upper limit 
+
+	a = [1..]
+	a = [1, 2, 3, 4, 5, ...]
+
+Use take function to get a set amount of elements.
+ 
+	take 10 [1..] == [1..10]
+
+Use cycle to turn a list into an infinite list
+
+	cycle [1, 2, 3] == [1, 2, 3, 1, 2, 3, 1, 2, 3, ...] 
+
+
+Set/List Comprehension
+-----------------------
+
+Define rules like this:
+
+	e.g: [x*2 | x<-[1..10], x*2 >= 12]
+
+	The left hand side specifies the rule and the right hand side defines the domain the rule works in and any predicates the function is defined to. 
+
+Filtering is when a predicated is added to our set comprehension.
+
+Multiple predicates can be added onto the set comprehension by using the comma, predicates must all evaluate to be True for a given number to be added onto the returned list.
+
+	e.g: [x*2 | x<-[1..100], x>50, x/=54]
+
+You can also specify multiply variables that are used in the set comprehension with their own domain.
+
+	e.g: [x*y | x<-[1..10], y<-[1.10]] 
+	This will produce 100 items in total as each x element will nbe times by each y element
+
+This can also be applied to strings (list of chars)
+
+	e.g: 
+	names = ["subeen", "krishna", "sujana", "sharada"]
+	emails = ["@gmail.com", "@hotmail.com", "@yahoo.co.uk"]
+
+	useremail = [n ++ e | n<-names, e<-emails]
+
+
+TUPLES
+-------------------------------
+Tuples are like lists, but they can contain multiple types.
+
+	(1, 2, 3) this a triple tuple. 
+
+	(1, 2, False) is also a tuple.
+	(1, 2, 4) is not the same type as the above example.
+
+Zipping
+-------
+This takes two lists to make a list of pairs, where the pairs are created by matching elements in order.
+
+	e.g: zip [1..4] ['a'..'d']
+	[(1,'a'),(2,'b'),(3,'c'),(4,'d')]
+
+If the lists aren't of the same size, then it will stop the matching process and return the list as it was so far.
+
+	zip [1..2] ['a'..'d']
+	[(1, 'a'), (2, 'b')]
+
+We can also zip infinite list with finite lists
+
+	zip [1..] [ x*y | x<-[1..50], y<-[1..50], x*y <50, x `mod` ==0]
+
+TYPES/TYPECLASSES
+------------------
+
+:t {a} -> returns type of a
+This will output a::{Type}, :: here means has type of.
+
+Function type declaration
+
+{function name} :: {param1} -> {param2} -> ... -> {paramI} -> {return1}
+
+Types
+--------
+
+The following are Explicit Types, this is denoted with starting the type with a capital letter.
+
+Int -> bounded integer (more efficient)
+Integer -> unbounded integer
+Float -> Single precision number can represent decimals
+Double -> decimal with higher precision 
+Bool -> can be True or False
+Char -> single character
+String -> [Char], list of characters
+
+Type variable, allow for functions to handle any types. They are denoted using lower case starting letters.
+
+Functions that use type variables are polymorphic.
