@@ -111,6 +111,9 @@ maxBound :: {type} -> if type is in the Bounded typeclass, this will return its 
 
 fromIntegral {Integral} -> returns a more general number which can be used in more context.
 
+error {String} -> when this code is run a runtime error is envoked causing the program to crash 
+
+
 IF THEN ELSE
 -----------------
 
@@ -317,4 +320,7 @@ Pattern Matching
 ----------------
 
 Writing a specific definition of a function for a specific case of the parameters. 
+
+Pattern Matching should not be soley used as this may result into the program crashing if a unspecified case is not explained
+
 

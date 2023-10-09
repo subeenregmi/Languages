@@ -20,4 +20,6 @@ factorec n
     | n == 0    = 1
     | otherwise = n * factorec (n-1) 
 
-
+revS :: String -> String
+revS [] = ""
+revS (x:xs) = revS (xs) ++ [x]
