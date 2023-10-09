@@ -27,6 +27,7 @@ Use tuples when you know how much elements go into the tuple and if they vary in
 
 If you want to find out the type of a infix operator you have to use parenthesis to surround the operator.
 
+When pattern matching make sure you define specific cases first and above the general case, this way the cases can be run properly.
 
 FUNCTIONS/KEYWORDS
 -------------------
@@ -109,6 +110,7 @@ minBound :: {type} -> if type is in the Bounded typeclass, this will return its 
 maxBound :: {type} -> if type is in the Bounded typeclass, this will return its upper limit
 
 fromIntegral {Integral} -> returns a more general number which can be used in more context.
+
 IF THEN ELSE
 -----------------
 
@@ -306,4 +308,13 @@ Common typeclasses:=
 - Num : types that act like numbers, e.g: Int, Integer, Double, Float
 - Integral: only includes whole numbers
 - Floating: only includes floating point numbers
+
+SYNTAX IN HASKELL 
+-----------------
+
+
+Pattern Matching
+----------------
+
+Writing a specific definition of a function for a specific case of the parameters. 
 
