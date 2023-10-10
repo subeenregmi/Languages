@@ -23,3 +23,7 @@ factorec n
 revS :: String -> String
 revS [] = ""
 revS (x:xs) = revS (xs) ++ [x]
+
+len :: (Num a) => [b] -> a 
+len []     = 0 
+len (_:xs) = 1 + len(xs)

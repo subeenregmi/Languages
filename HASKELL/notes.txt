@@ -323,4 +323,22 @@ Writing a specific definition of a function for a specific case of the parameter
 
 Pattern Matching should not be soley used as this may result into the program crashing if a unspecified case is not explained
 
+	e.g: say5 5 = "Five"
+		 say5 x = "Not Five"
+
+Pattern Matching a list to x:xs, will only work if the list has a length ofone or more
+
+If you want to pattern match a list that has three or more elements. 
+
+	e.g: x:y:z:zs
+
+When pattern matching a list to x:xs, to have a copy of the entire list all you need to do is:
+
+e.g:	func {name}@*(x:xs) = ...
+
+	This stores the list in `name` so it can be used if needed
+
+Guards
+-------
+
 
