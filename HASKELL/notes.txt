@@ -341,4 +341,49 @@ e.g:	func {name}@*(x:xs) = ...
 Guards
 -------
 
+Guards are a way of testing whether some property is true or false, if true it can execute code. 
+ 
+say5 :: Num a => a -> String
+say5 x
+   | x == 5           = "Five"
+   | x == 4 || x == 6 = "Close
+   | otherwise        = "not close"
 
+
+where keyword
+-------------
+
+The where keyword is used in functions to create local variables that can be used in the function defintions, this is useful as it can precalculate variables and also can be more consise. This is particularly useful to speedup certain functions that might take more time. 
+
+sayNum :: (Integral a) -> a -> String
+sayNum x 
+	| x == target                                      = "Five"
+	| x == target - nearstep || target + nearstep == 3 = "Close"
+	| otherwise                                  	   = "not close"
+	where target = 5
+		  nearstep = 1
+
+functions can also be defined in the where clause, this should be used when you want to keep some functions local.
+
+let keyword
+------------
+
+let <binding> in <expression>
+
+the variables in <binding> can be used in <expression>
+
+let a = 9 in a+1 -> this is equal to 10
+
+let circleArea r = 3.14 * r^2 in circleArea 5o
+
+let a=50; b=20 in a+b
+
+if you use just the let keyword, it can be used in the interactive session but when the in keyword is used then it goes out of scope once the code is executed 
+	 
+case keyword
+-------------
+
+case <expression> of <pattern> -> <result>
+					 <pattern> -> <result>
+
+This is essentially pattern matching in the function definition
