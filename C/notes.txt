@@ -1,0 +1,30 @@
+Mostly the / -> sign means integer division, so 5/9 would truncate to zero.
+To overcome this use 5.0/9.0.
+
+printf("<string> %d, %i", <decimal>, <int>);
+	- The decimal provided after the string will replace the %d, so will the integer.
+	- use an integer after percentage sign, e.g: %6d, to print the characters in a field 6 digits wide
+	- if you use a floating point number instead of an int infront of the percentage, then it has other meanings:
+	- %3.0f ==> atleast 3 characters wide with no decimal point and no fractional digits
+	- %3.1f ==> ateleast three characters wide, with 1 digit after decima l
+
+	- %o - octal
+	- %x - hexadecimal
+	- %c - character 
+	- %s - string
+	- %% - for a percent sign
+
+for loop 
+---------
+
+for(int i=0; i<4; i++)
+The first step is initialisation, second is evaluation, last is incrimentation
+
+The code is run before the incrimentation stage if the evaluation is successful. 
+
+define
+------
+
+#define NAME <value>
+
+This will replace all instances of NAME to value at compile time.
