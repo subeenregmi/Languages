@@ -28,3 +28,9 @@ define
 #define NAME <value>
 
 This will replace all instances of NAME to value at compile time.
+
+Character Input and Output =+
+
+A text stream is a sequence of characters divided into lines; each line consists of zero or more characters followed by a new line character.
+
+
