@@ -33,4 +33,8 @@ Character Input and Output =+
 
 A text stream is a sequence of characters divided into lines; each line consists of zero or more characters followed by a new line character.
 
+chars are interpreted as integers of their actual ASCII value
 
+use #include <stdbool.h> to use bool values.
+
+strings are used as such char[] string = "hello world"
