@@ -48,6 +48,11 @@ replicate' :: (Integral a) => a -> a -> [a]
 replicate' 1 b = [b]
 replicate' a b = b : replicate' (a-1) b 
 
+repTen :: (Integral a) => a -> [a]
+repTen = replicate' 10
+
 take' :: (Integral a) => a -> [b] -> [b]
 take' 1 (x:_) = [x]
 take' a (x:xs) = x : take' (a-1) xs
+
+

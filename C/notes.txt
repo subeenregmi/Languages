@@ -38,3 +38,13 @@ chars are interpreted as integers of their actual ASCII value
 use #include <stdbool.h> to use bool values.
 
 strings are used as such char[] string = "hello world"
+
+Functions
+-------------------
+
+return-type function-name(parameters){
+	body
+	return <return-type>
+}
+
+function declaration or prototype is just the name of the function and its parameters, 

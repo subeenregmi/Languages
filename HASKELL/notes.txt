@@ -392,3 +392,52 @@ RECURSION
 --------------------------
 
 Edge condition / Base condition -> this is where the recursion stops. This is needed in a recursive function as then the recursion will never stop.
+
+Higher Order Functions
+-------------------------------
+
+Higher order functions take a function as a parameter or return a function. 
+
+Anonymous Functions: functions with out names similiar to lambda functions 
+
+e.g: \{params} -> {expressions}
+	(\{params} -> {expressions}) {actual values}
+
+they can be assigned to a variable by using =.
+
+map {function} {list} : map applies the function given to each element in list and returns the values of it.
+
+filter {predicate} {list} : filter returns a list of values which satisfy the predicate
+
+Curried Functions: 
+
+f :: a -> b -> c -> d
+
+is equivalent to 
+
+f :: a -> (b -> (c -> d))
+
+This means f takes a parameter of type 'a' and returns another function, this function takes a parameter of type 'b' and returns a function. this function then takes a 'c' and returns a 'd'
+
+This means ALL functions in haskell only take one parameter, it each returns a value or a function that may also return a value or another function.
+
+Partial Function Application: 
+
+Thus if we have an function add.
+
+add :: Int -> (Int -> Int)
+add x y = x + y
+
+another example, this is maps type
+
+map :: (a -> b) -> [a] -> [b]
+
+we can rewrite this as:
+
+map :: (a -> b) -> ([a] -> [b])
+
+Map takes a function which takes type 'a' and returns 'b', and then it returns a function which takes a list of 'a's and returns a list of 'b's
+
+
+
+This means that add 1, does not result into an error, it means add 1 is a new function. 
