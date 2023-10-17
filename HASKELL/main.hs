@@ -44,3 +44,10 @@ findFib n = case n of 0 -> 0
 fibNums :: [Integer]
 fibNums = [findFib x | x <- [0..]]
  
+replicate' :: (Integral a) => a -> a -> [a]
+replicate' 1 b = [b]
+replicate' a b = b : replicate' (a-1) b 
+
+take' :: (Integral a) => a -> [b] -> [b]
+take' 1 (x:_) = [x]
+take' a (x:xs) = x : take' (a-1) xs

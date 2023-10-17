@@ -17,7 +17,7 @@ Function Application - Passing paramaters to a function (this has the highest pr
 
 Functions cannot start with CAPITAL Letters
 Use of ' is valid for function naming
-If a function name ends with ' this means that the function isnt lazy or has been modified form the original. 
+If a function name ends with ' this means that the function isnt lazy or has been modified from the original. 
 
 Strings are just a list of characters. 
 
@@ -326,7 +326,7 @@ Pattern Matching should not be soley used as this may result into the program cr
 	e.g: say5 5 = "Five"
 		 say5 x = "Not Five"
 
-Pattern Matching a list to x:xs, will only work if the list has a length ofone or more
+Pattern Matching a list to x:xs, will only work if the list has a length of one or more
 
 If you want to pattern match a list that has three or more elements. 
 
@@ -374,16 +374,21 @@ the variables in <binding> can be used in <expression>
 
 let a = 9 in a+1 -> this is equal to 10
 
-let circleArea r = 3.14 * r^2 in circleArea 5o
+let circleArea r = 3.14 * r^2 in circleArea 5
 
 let a=50; b=20 in a+b
 
-if you use just the let keyword, it can be used in the interactive session but when the in keyword is used then it goes out of scope once the code is executed 
-	 
+if you use just the let keyword, it can be used in the interactive session but when the in keyword is used then it goes out of scope once the code is executed
+
 case keyword
 -------------
 
-case <expression> of <pattern> -> <result>
-					 <pattern> -> <result>
+	case <expression> of <pattern> -> <result>
+						 <pattern> -> <result>
 
-This is essentially pattern matching in the function definition
+This is essentially pattern matching in the function definition.
+	
+RECURSION 
+--------------------------
+
+Edge condition / Base condition -> this is where the recursion stops. This is needed in a recursive function as then the recursion will never stop.
