@@ -438,6 +438,6 @@ map :: (a -> b) -> ([a] -> [b])
 
 Map takes a function which takes type 'a' and returns 'b', and then it returns a function which takes a list of 'a's and returns a list of 'b's
 
-
-
 This means that add 1, does not result into an error, it means add 1 is a new function. 
+
+takeWhile {predicate} {list} -> keeps taking items out of the list until the predicate evaluates to false:

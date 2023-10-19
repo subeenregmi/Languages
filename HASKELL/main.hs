@@ -55,4 +55,8 @@ take' :: (Integral a) => a -> [b] -> [b]
 take' 1 (x:_) = [x]
 take' a (x:xs) = x : take' (a-1) xs
 
-
+collatzChain :: (Ord a, Integral a) => a -> [a]
+collatzChain 1 = [1]
+collatzChain n
+    | n `mod` 2 == 0 = n : collatzChain(n `div` 2)
+    | otherwise  = n : collatzChain(3*n + 1)
