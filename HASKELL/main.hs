@@ -72,5 +72,11 @@ mapper :: (a -> b) -> [a] -> [b]
 mapper _ [] = []
 mapper f (x:xs) = f x : mapper f xs
 
-revFold l = foldl (\acc elem -> elem:acc) [] l
+-- Practice 1
+rev :: [a] -> [a]
+rev l = foldr (:) [] l
+
+-- Practice 2
+prefixes :: [a] -> [[a]]
+prefixes = foldl (\x y -> if null x then [[y]] else x ++ [last x ++ [y]]) [] 
 

@@ -449,3 +449,4 @@ foldl {function that takes two parameters} {starting val} {list}
 
 foldr (\elem acc -> <term>) <start_acc> <list>
 foldl (\acc elem -> <term>) <start_acc> <list>
+
