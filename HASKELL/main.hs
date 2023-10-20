@@ -60,3 +60,17 @@ collatzChain 1 = [1]
 collatzChain n
     | n `mod` 2 == 0 = n : collatzChain(n `div` 2)
     | otherwise  = n : collatzChain(3*n + 1)
+
+flip' :: (a -> b -> c) -> (b-> a -> c)
+flip' f x y = f y x 
+
+folder :: (Num a) => (a -> a -> a) -> a -> [a] -> a
+folder f acc (x:xs) = folder (f) (f acc x) (xs)  
+folder f acc [] = acc 
+
+mapper :: (a -> b) -> [a] -> [b]
+mapper _ [] = []
+mapper f (x:xs) = f x : mapper f xs
+
+revFold l = foldl (\acc elem -> elem:acc) [] l
+

@@ -441,3 +441,11 @@ Map takes a function which takes type 'a' and returns 'b', and then it returns a
 This means that add 1, does not result into an error, it means add 1 is a new function. 
 
 takeWhile {predicate} {list} -> keeps taking items out of the list until the predicate evaluates to false:
+
+Folds: Functions that take a list and return a single value.
+
+foldl {function that takes two parameters} {starting val} {list}
+- this function goes from left to right applying the operator to all the items and the starting value.
+
+foldr (\elem acc -> <term>) <start_acc> <list>
+foldl (\acc elem -> <term>) <start_acc> <list>
