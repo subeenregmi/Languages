@@ -450,3 +450,13 @@ foldl {function that takes two parameters} {starting val} {list}
 foldr (\elem acc -> <term>) <start_acc> <list>
 foldl (\acc elem -> <term>) <start_acc> <list>
 
+
+foldl (+) 0 [1, 2, 3, 4] is equivalent to
+	==
+((+)((+)((+)((+) 0 1) 2) 3) 4)
+
+((F)((F)((F)((F) [] 1) 2) 3) 4)
+
+foldr (+) 0 [1, 2, 3, 4] is equivalent to
+	== 
+((+) 1 ((+) 2((+) 3 ((+) 4 0))))
