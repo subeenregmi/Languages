@@ -48,3 +48,9 @@ return-type function-name(parameters){
 }
 
 function declaration or prototype is just the name of the function and its parameters, 
+
+Functions use pass by value meaning they pass parameters as a local copy thus they cannot affect the actual variable that was passed in. 
+
+Character Arrays
+------------------------
+Terminated with \0
