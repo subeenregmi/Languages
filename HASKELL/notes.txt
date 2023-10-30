@@ -358,7 +358,8 @@ The where keyword is used in functions to create local variables that can be use
 sayNum :: (Integral a) -> a -> String
 sayNum x 
 	| x == target                                      = "Five"
-	| x == target - nearstep || target + nearstep == 3 = "Close"
+	| x == target - nearstep = "Close"
+	| x == target + nearstep = "Close"
 	| otherwise                                  	   = "not close"
 	where target = 5
 		  nearstep = 1
@@ -378,7 +379,7 @@ let circleArea r = 3.14 * r^2 in circleArea 5
 
 let a=50; b=20 in a+b
 
-if you use just the let keyword, it can be used in the interactive session but when the in keyword is used then it goes out of scope once the code is executed
+if you use just the let keyword, it can be used in the interactive session but when the 'in' keyword is used then it goes out of scope once the code is executed
 
 case keyword
 -------------
@@ -460,3 +461,188 @@ foldl (+) 0 [1, 2, 3, 4] is equivalent to
 foldr (+) 0 [1, 2, 3, 4] is equivalent to
 	== 
 ((+) 1 ((+) 2((+) 3 ((+) 4 0))))
+
+Use foldr to create new lists this is because you can use : operator which is much faster.
+
+Right folds work on infinite lists, whereas left folds do not.
+
+fold(l/r)1 -> the same as foldl but you do not need to specify a explicit starting value. They need to be called with a non empty list as if not they cause an error.
+
+scan(l/r)(1) -> like fold but they report the intermediate accumulated variables as a list
+
+Function Application with $
+---------------------------------
+
+f $ x = f x, the dollar sign has low precedence and is right associative.
+
+sum $ map f == sum ( map f )
+
+consider 
+
+sum map sqrt [1..50] -> this should get us the sum of all sqaure roots from 1 to 50. But, as function application with spaces is left associative the function is equivalent to 
+
+((sum map) sqrt) [1..50] 
+
+which results into an error so we have to write
+
+sum (map sqrt [1..50])
+
+but to save keystrokes this is equivalent to 
+
+sum $ map sqrt [1..50]
+
+f (g (z x)) == f $ g $ z x
+
+Function Composition
+--------------------
+
+Use the . operator, f . g == f ( g x )
+
+MODULES
+-------------------------------------------------
+
+A haskell module is a collection of related functions, types and typeclasses.
+
+A haskell prgram is a collection of modules, where the main module loads and calls function of other modules.
+
+Prelude module is the module that is imported by default.
+
+import <module name> 
+
+to import only specified functions do this
+
+import <module name> (<function name(s)>)
+
+to import a module and hide certain functions
+
+import <module name> hiding (<function name(s)>)
+
+to import a module that has clashing names with a module that is already imported use
+
+import qualified <module name> 
+
+-> This will make it so that to call those functions you will have to use <module name>.<function name> 
+
+you can also give the module a name by doing the following
+
+import <module name> as <generic name>
+
+Data.List
+-------------
+Functions relating to lists
+
+intersperse <char> <string> -> places the character in between each character in the string
+
+e.g:
+
+	intersperse '.' "subeen" 
+	"s.u.b.e.e.n"
+
+intercalate <list> <list of lists> -> flattens the list of lists by putting the list in between each of the lists
+
+e.g:
+
+	intercalate " " ["hey", "there"]
+	"hey there"
+
+	intercalate [8] [[0], [1], [2]]
+	[0, 8, 1, 8, 2]
+
+transpose <list of lists> -> transposes a list of lists, by sswapping rows by columns.
+
+This also does the same as taking the first element of every list and making that into a new list and then taking the second element of every list and making that into a new list, this process repeats for all elements, if elements have no more elements it is just skipped.
+
+e.g:
+
+	transpose [[0, 1, 2], [3, 4, 5], [6, 7, 8]]
+	[[0, 3, 6], [1, 4, 7], [2, 5, 8]]
+	
+fold(l/r)' -> are stricter versions of fold(l/r) that prevents overflow errors by making them not lazy. 
+
+These errors occurs as haskell is lazy the accumulator value will not produce a value rather a promise to calculate that value.
+
+concat <list of list> -> concatenates / flattens all lists into a single list, this will only remove one level of nestingo
+
+concatMap <function> <list of list> -> applys function to list and the conatenates all the items
+
+and <list of bools> -> returns True if all items are also True
+
+or <list of bools> -> or using a list
+
+any <predicate> <list> -> returns true if any element satisfies the predicate 
+
+all <predicate> <list> -> returns true if all elements satisfy the predicate
+
+iterate <function> <starting value> -> returns an infinite list with the first element being the the starting value and all other elements are the function applied to the previous element
+
+e.g: 
+	take 3 $ iterate (+3) 1
+	[1, 4, 7]
+
+splitAt <int index> <list> -> returns a tuple of the split list
+
+e.g: 
+	splitAt 3 "subeen"
+	("sub", "een")
+
+takeWhile <predicate> <list> -> goes through the list and checks if the predicate evaluates to true, if it does it takes that element, it takes elements until the predicate evaluates to false
+
+dropWhile <predicate> <list> -> it drops items until the predicate is evaluated to false, and then returns the remaining items.
+
+span <predicate> <list> -> returns a pair (tuple) of lists, that splits the provided list at the first instance where the predicate returns False
+
+e.g:
+	span (/=3) [1..10]
+	([1, 2], [3, 4, 5, 6, 7, 8, 9, 10])
+
+break <predicate> <list> -> does the same thing as span but only splits the list when the predicate returns true.
+
+sort <list> -> sorts the list, elements have to be in the Ord typeclass
+
+e.g:
+	sort [2, 3, 42, 1, 4, 12, 52, 22, 2]
+	[1,2,2,3,4,12,22,42,52]
+
+group <list> -> takes a list of items that are in the Eq typeclass and returns a list of sublists of all consisting of the same item. 
+
+e.g:
+	group [1, 2, 2, 3]
+	[[1], [2, 2], [3]]
+
+inits / tails <list> -> recursively apply the init and tail function of a list and add the result to a list until the function returns nothing
+
+e.g: 
+	tails "Subeen"
+	["Subeen","ubeen","been","een","en","n",""]
+
+isInfixOf <list> <longer list> -> returns true if the first list is present in the longer list
+
+isPrefixOf <list> <longer list> -> returns true if the the list is at the start of the longer list
+
+isSuffixOf <list> <longer list> -> does the same as before but checks the end of the longer list
+
+elem/notElem <item> <list of items> -> returns True if the item is present in the list or not.
+
+partition <predicate> <list> -> returns a pair of lists, the first list contains all items of the list which satisfy the predicate and the other items are the rest.
+
+e.g
+
+	partition (`elem` ['a'..'z') "Subeen Regmi Is Here"
+	(["ubeenegmisere"], ["S R I H"])
+
+span / break is different to partition as they stop as soon as the predicate evaluates to false.
+
+Maybe value -> can be either Just Something or Nothing
+
+find <predicate> <list> -> finds the first value that evaluates the predicate to be true. returns either Just <int> or Nothing
+
+elemIndex <item> <list> -> returns a Maybe <int>, which is the index of the item or Nothing if the item is not in the list. 
+
+elemIndices <item> <list> -> returns a list of ints which correspond to the indexes of where the item is in the list. 
+
+e.g:
+
+	elemIndices 's' "subeenregmiiscool"
+	[0, 11]
+
+
