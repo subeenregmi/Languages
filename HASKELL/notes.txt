@@ -645,4 +645,169 @@ e.g:
 	elemIndices 's' "subeenregmiiscool"
 	[0, 11]
 
+findIndex <predicate> <list> -> returns a Maybe Int for the index of the first element to satisfy the predicate
+
+e.g:
+	findIndex (\x -> x**2 < x) [1, 0.9, 0.12]
+	Just 1
+
+	findIndex (\x -> x**2 < x) [1, 2, 3]
+	Nothing
+
+zip(With)(3/4/5/6/7) (f) <list1> <list2> ... <listN> -> does the same as zip or zip with but can now be used with upto seven
+lists
+
+lines <string> -> splits up the original string into substring by seperating when there is a \n character. returns all substring in a new list.
+
+e.g:
+
+	lines "subeen\nis\ncool"
+	["subeen", "is", "cool"]
+
+unlines <list of strings> -> undoes the lines operator, and concatenates all the string and putting a \n character inbetween each string
+
+e.g:
+	unlines ["subeen", "is", "cool"]
+	"subeen\nis\ncool\n" 
+
+nub <list> -> returns a list that removes duplicates.
+
+e.g:
+	nub "subeenishere"
+	"subenihr"
+
+delete <element> <list of elements> -> removes the fist occurence of the element in the list, returns the remaining list
+
+e.g:
+	delete 'e' "subeenishere"
+	"subenishere"
+
+<list1> \\ <list2> -> returns all elements of list1 that are not in list2, essentially subtract list1 from list2/
+
+<list1> `union` <list2> -> returns the union of the two lists, returns all items in both lists and removes duplicates
+
+<list1> `intersect` <list2> -> returns the intersection of the two lists, returns a new list of items that are in both lists.
+
+insert <item> <list> -> will insert an item in its correct order, it does this by going to each element and checking if it greater
+or equal to the inserting item, if found the new item is inserted just before.
+
+e.g:
+
+	insert 4 [1, 2, 6, 3]
+	[1, 2, 4, 6, 3]
+
+Most functions e.g: length, take, drop either accept an Int or return an Int, you can prepend generic before the function to a get a more
+generic version of Num
+
+Some other functions e.g: nub, delete, group also can by changed to use a predicate instead of a fixed one, by add a By at the end.
+e.g: groupBy
+
+on Function
+--------------------
+from Data.Function
+
+on <function 1 that takes two params> <func2 that takes 1 param> == 
+`f` on `g` = \x y -> f (g x) (g y)
+
+Data.Map
+-------------
+import qualified Data.Map as Map
+
+Dictionaries
+------------
+
+Map.fromList <list of (k, v)> -> takes a list of key value pairs, and returns a map/dictionary.
+If there are duplicate keys in the list, then last duplicate is used.
+
+Map.empty -> create an empty map/dictionary
+
+Map.insert <key> <value> <Map> -> inserts the (key, value) pair into the Map.
+
+e.g:
+	ghci> Map.insert 3 100 Map.empty
+	fromList [(3,100)]
+
+	ghci> Map.insert 4 5 it
+	fromList [(3,100),(4,5)]
+
+Map.null <Map> -> returns True if Map has no key value pairs
+
+Map.size <Map> -> returns how much key value pairs are in a map
+
+Map.singleton <key> <value> -> returns a map that only has one key value pair.
+
+Map.member <key> <map> -> returns true/false if a key-value pair exists in a given map.
+
+Map.map <f> <map> -> returns a map where each value undergoes the function f and replaced.
+
+Map.filter <predicate> <map> -> filters the key-value pairs, using the predicate p
+
+Map.toList <map> -> turns the map into a list form.
+
+Map.keys <map> -> returns a list of keys
+ 
+Map.values <map> -> returns a list of values
+
+Map.fromListWith <function> <list> -> this again creates a map, but the function is run when there is two duplicate keys. It is called
+with two duplicate values.
+
+Map.insertWith <function> <map> -> if there is a duplicate it runs the function against the two values and uses that as the keys value.
+
+
+Data.Set
+------------------
+Sets can only contain items which are unique.
+
+import qualified Data.Set as Set
+
+Set.fromList <list> -> creates a set using a list
+
+Set.intersection <set1> <set2> -> returns the intersection of the two sets, a new set with elements that are present in both sets.
+
+Set.difference <set1> <set2> -> returns the difference of set1 from set2, this means it only items in set1 that are not in set2
+
+Set.union <set1> <set2> -> returns items that are in both or only one of the sets.
+
+<set1> `Set.isSubsetOf` <set2> -> returns true or false depending if set1 is a subset of set2
+
+<set1> `Set.isProperSubsetOf` <set2> -> returns true or false depending if set1 is a proper subset of set2, this means it the sets can not be the same.
+
+Set.(filter/map/null/size/empty/singleton/insert/delete) -> these functions are all the same.
+
+Set.toList -> turns set into list
+
+Making our own modules
+--------------------------
+
+Create a new file, mod.hs
+
+Then write
+
+module mod
+( function1
+, function2
+, function3
+) where
+function1 :: a -> b
+function1 x = "subeen"
+
+helper1 :: Int -> Int
+helper1 n = 5
+
+To make it so you can create a more hierarchal structure to the module
+
+create a folder with the name of the module
+
+Mod
+|____ sphere.hs
+|____ rook.hs
+
+inside the sphere.hs
+
+create a module Mod.sphere etc.
+
+Use a qualified import in any of the hs files or the ghci to make sure there is no overlapping functions
+
+
+
 
