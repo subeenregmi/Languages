@@ -808,6 +808,151 @@ create a module Mod.sphere etc.
 
 Use a qualified import in any of the hs files or the ghci to make sure there is no overlapping functions
 
+Types and typeclasses
+----------------------------------------------------
 
+To create your own data types e.g: Int, Char, Bool. Use the format:
+
+data <NameOfType> = <Constructor1> <Params> | <Constructor2> <Params> | ...
+
+all constructors, params and the name of the type must have the first character capitalized.
+
+the | means or, the constructors are value constructors that once successfully called return a object with type <NameOfType>
+
+e.g:
+
+	data Time = Date Int Int Int
+
+so the type is Time and Date is a value constructor that will return a Time object
+
+to make it so the type can be printable, use 
+
+derving (Show)
+
+at the end of the declaration
+
+e.g:
+	data Time = Date Int Int Int deriving (Show)
+
+If your type has only one constructor then you call the constructor the types name.
+
+To make it so you can export a type into a module do so by doing:
+
+module Name
+( Time(..)
+, printTime
+)  
+
+The (..) includes all the value constructors, we could have also just written the constructors name. 
+
+If the () are ommited then the user cannot create that object directly.
+
+Record Syntax
+---------------
+
+One other way of declaring a data type is by doing the following
+
+data Time = Time { day :: String
+                 , month :: String
+				 , year :: Int
+	             } derving (Show)
+
+This format you can access the different variables of the data type
+
+now Haskell creates functions name day, month and year and once passing a time object with any of those function will return the correct information.
+
+e.g:
+	Time "Monday" "Feb" 2023
+	month Date == "Feb" 
+
+To create new objects you can use the syntax
+
+Time {day = "Monday", month = "Feb", year = 2023}
+
+Value constructor -> a constructor that takes in values to return an object
+Type constructor -> a constructor that take in types to return another type
+
+An example of a type constructor is the Maybe type.
+
+To create a data type that will accept any types:
+
+data Time a b c= Time { day :: a
+                      , month :: b
+                      , year :: c
+                      } deriving (Show)
+
+To add a typeclass constraint to the class.
+
+data (Ord k) => Map k v = ...
+
+But this shouldn't be used in practice, you should add this constrain into other function declarations
+
+e.g;
+
+	toList :: (Ord k) => Map k v -> [(k, v}]
+
+Derived Instances
+-------------------------------
+
+Typeclass - interface that defines behaviour
+You make any type, instances of a typeclass by implimenting the functions defined by the typeclass.
+
+by including "derving (Eq)", we make it so that we can check if two things types by checking their constructor
+
+Eq - allows for checking if two things are equal
+Show - allows for printing
+Read - allows for turning String into object, string has to be a call to value constructor
+Ord - allows for checking what is less than, greater than etc, does this by checking which constructor was used with the first constructor being the smallest.
+
+e.g:
+	data Time = Date Int Int Int | Seconds Int
+	Date < Seconds
+
+Enum - Only works for data types that have no parameter constructors, this allows us to create ranges.
+Bounded - Allows for smallest and greatest items.
+
+Type synonyms
+---------------------------
+
+Place holder for types
+
+type String = [Char], this just essentially means String is representing [Char]
+
+these can be parameterised
+
+type List k = [k]
+
+Recursive data types
+--------------------
+
+data List a = Empty | Cons a (List a)
+
+Fixity Declarations
+--------------------
+
+infix(r\l) (fixity score) <set of symbols that aren't letters>
+
+The r or l specifies the if the operator is left or right accosicative, the fixity score determines which operator has precedence.
+
+Pattern matching works by comparing constructors.
+
+Type-classes
+-----------------
+Like interfaces defining some behavior
+
+To define type classes 
+
+class <name> a where
+   (func1) -> params -> return value
+
+how to make an instance of a type class
+
+instance <typeclass> type where
+   ...
+
+To make type classes a subclass of another type class
+
+class (<typeclass1> a) => <typeclass2> a where
+    ...
 
 

@@ -80,3 +80,19 @@ rev l = foldr (:) [] l
 prefixes :: [a] -> [[a]]
 prefixes = foldl (\x y -> if null x then [[y]] else x ++ [last x ++ [y]]) [] 
 
+data Time = Date Int Int Int deriving (Show)
+
+printTime :: Time -> String
+printTime (Date x y z) = "The day is " ++ show x ++ ". The month is " ++ show y ++ ". The year is " ++ show z ++ "."
+
+data Tree = Empty | Node Int (Tree) (Tree) deriving (Show)
+
+addToTree :: Int -> Tree -> Tree
+addToTree n Empty = Node n Empty Empty
+addToTree n (Node x a b)
+    | n > x = Node x a (addToTree n b)
+    | n < x = Node x (addToTree n a) b
+    | otherwise = (Node x a b)
+
+listToTree :: [Int] -> Tree
+listToTree x = foldr addToTree Empty (reverse x)
