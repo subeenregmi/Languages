@@ -85,14 +85,18 @@ data Time = Date Int Int Int deriving (Show)
 printTime :: Time -> String
 printTime (Date x y z) = "The day is " ++ show x ++ ". The month is " ++ show y ++ ". The year is " ++ show z ++ "."
 
-data Tree = Empty | Node Int (Tree) (Tree) deriving (Show)
+data Tree a = Empty | Node a (Tree a) (Tree a) deriving (Show)
 
-addToTree :: Int -> Tree -> Tree
+addToTree :: (Ord a) => a -> Tree a -> Tree a
 addToTree n Empty = Node n Empty Empty
 addToTree n (Node x a b)
     | n > x = Node x a (addToTree n b)
     | n < x = Node x (addToTree n a) b
     | otherwise = (Node x a b)
 
-listToTree :: [Int] -> Tree
+listToTree :: (Ord a) => [a] -> Tree a
 listToTree x = foldr addToTree Empty (reverse x)
+
+instance Functor Tree where
+    fmap f (Empty) = Empty
+    fmap f (Node x a b) = Node (f x) (fmap f a) (fmap f b)

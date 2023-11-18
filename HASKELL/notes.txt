@@ -950,9 +950,71 @@ how to make an instance of a type class
 instance <typeclass> type where
    ...
 
+e.g:
+
+instance Show Time where
+	show Date = "The time is..."
+
+
 To make type classes a subclass of another type class
 
 class (<typeclass1> a) => <typeclass2> a where
     ...
+
+id -> means that it takes a parameter and return it
+
+so typeclasses may have something like
+
+{-# MINIMAL (f1) | (f2) | .. #-} 
+
+this means you only need to implement either f1 or f2, there is no need to use both.
+
+
+Functor typeclass
+-------------------------------
+
+Essentially things that can be mapped over.
+
+class Functor f where
+	fmap :: (a->b) -> f a -> f b
+
+f here is a type constructor
+
+instance Functor <type> where
+	fmap f (construct1) = ..
+
+The type must have a type constructor.
+
+Type constructors take other types as parameters to eventually produce concrete types.
+
+
+Kinds
+---------
+Kind is a type of a type.
+
+use :k to find out he kind of a type
+
+:k Int 
+Int :: *
+
+The * means that this is a concrete type.
+
+A concrete type is a type that doesnt take any type constructors.
+
+:k Maybe
+Maybe :: * -> *
+
+Maybe takes one concrete type and returns another concrete type.
+
+:k Either
+Either :: * -> * -> *
+
+Either takes two concrete types, Either a b and returns another concrete type Left Right
+
+Functors what types of kinds: * -> *
+
+
+Input/Output
+--------------------
 
 
