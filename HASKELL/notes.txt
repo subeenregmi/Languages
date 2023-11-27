@@ -1011,10 +1011,49 @@ Either :: * -> * -> *
 
 Either takes two concrete types, Either a b and returns another concrete type Left Right
 
-Functors what types of kinds: * -> *
+Functors need types of kinds: * -> *
 
 
 Input/Output
 --------------------
+
+putStrLn <string> -> prints out the text into the console
+
+running the command 'ghc --make filename.hs' will compile the fileo
+
+putStrLn has a type
+
+putStrLn :: String -> IO (), where IO () means its an i/o action that has a result type of (), an i/o action is something that will have a side effect.
+
+start programs like
+
+main = do
+	statement1
+	statement2
+
+getLine -> is a an I/O function that gets input from the user.
+
+to use getLine do
+
+	var <- getLine
+	as if you do
+	var = getLine
+	var is assigned to the function getLine
+
+in a do block the last function cannot get bound to any variable.
+
+I/O actions will only be performed inside when given the name main, or when their inside a bigger I/O action composed with a do block.
+
+return <any pure value> -> takes the pure value and turns it into an I/O action.
+
+putStr <string> -> prints the string without a new line.
+putChar <char> -> prints a character to the console
+print <any show instance> -> prints whatever is the arguement into the console.
+
+getChar -> this is an I/O action that gets a character from the user
+
+when (<boolean condition>) <I/O action> this function is from Control.Monad, when the boolean condition is true the I/O action is executed.
+
+sequence [<I/O actions>] -> does all the I/O actions in order
 
 
