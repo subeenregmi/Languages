@@ -39,19 +39,51 @@ testGame i = Game [(0,1)] i ["Russell"] [[],["Brouwer","Heyting"]]
 ------------------------- Assignment 1: The game world
 
 connected :: Map -> Node -> [Node]
-connected = undefined
+connected [] _ = []
+connected (y:ys) x
+    | first == x  = second : connected ys x
+    | second == x = first : connected ys x
+    | otherwise   = connected ys x
+  where 
+    second = snd y
+    first  = fst y
 
 connect :: Node -> Node -> Map -> Map
-connect = undefined
+connect x y [] = if x < y then [(x, y)] else [(y, x)]
+connect x y (z:zs)
+    | x == y                        = error "Cannot connect same nodes together"
+    | (x, y) == z || (y, x) == z    = z:zs
+    | x < y && greaterThan z (x, y) = (x, y):z:zs              
+    | x > y && greaterThan z (y, x) = (y, x):z:zs              
+    | otherwise                     = z:connect x y zs
+  where
+    greaterThan :: (Node, Node) -> (Node, Node) -> Bool
+    greaterThan (z, f) (x, y)
+      | z > x           = True
+      | z == x && f > y = True
+      | otherwise       = False
 
 disconnect :: Node -> Node -> Map -> Map
-disconnect = undefined
+disconnect x y [] = []
+disconnect x y (z:zs)
+    | x < y && (x, y) == z = zs
+    | x > y && (y, x) == z = zs
+    | otherwise            = z:disconnect x y zs
 
 add :: Party -> Event
-add = undefined
+add [] g = g
+add (x:xs) (Game m n p ps)
+    | x `elem` p    = add xs (Game m n p ps)
+    | otherwise     = add xs (Game m n (merge [x] p) ps)
 
 addAt :: Node -> Party -> Event
-addAt = undefined
+addAt _ [] g = g
+addAt node party (Game m n p ps)
+    | node == 0 = Game m n p (merge ps party)
+    | otherwise = addAt (node-1) party (Game m n p (addSpace ps))
+  where
+    addSpace ps
+
 
 addHere :: Party -> Event
 addHere = undefined
