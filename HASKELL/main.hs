@@ -100,3 +100,13 @@ listToTree x = foldr addToTree Empty (reverse x)
 instance Functor Tree where
     fmap f (Empty) = Empty
     fmap f (Node x a b) = Node (f x) (fmap f a) (fmap f b)
+
+askNum :: (Show a) => a -> IO String 
+askNum a = do
+           print ("What colour do you associate with number "++ show a)
+           colour <- getLine
+           return colour
+
+colourAssoc a = mapM (askNum) a
+
+zipFake = zipWith (\x y -> (x, y)) 

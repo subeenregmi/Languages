@@ -1031,6 +1031,8 @@ main = do
 	statement1
 	statement2
 
+The 'do' keyword gathers multiple I/O actions into one I/O action.
+
 getLine -> is a an I/O function that gets input from the user.
 
 to use getLine do
@@ -1055,5 +1057,105 @@ getChar -> this is an I/O action that gets a character from the user
 when (<boolean condition>) <I/O action> this function is from Control.Monad, when the boolean condition is true the I/O action is executed.
 
 sequence [<I/O actions>] -> does all the I/O actions in order
+
+mapM <I/O function> [<list>] -> this applies the I/O action to each element in the list and then sequences all the I/O actions. This function returns all the return values from the I/O action. this is most likely a list of ().
+
+mapM_ -> does the same thing as above but does not return a list of return values.
+
+forever <I/O action> -> repeats the I/O action indefinitely. This is in Control.Monad.
+
+forM [<list>] <I/O action or lambda function (\a -> ...) -> This maps the function to each item in the list.
+
+getContents -> takes inputs from the user until a end-of-line character is detected. This useful for piping data into it, e.g from a file. This reads from the standard input.
+
+interact <String -> String function> -> This takes user from the input like getContents and then applies the function to the input.:
+
+Opening and handling files
+----------------------------
+import System.IO
+
+openFile <string that contains a file path> <I/O Mode> -> this will do an I/O action and return a file handle.
+
+The I/O Modes are:
+
+	- ReadMode
+	- WriteMode
+	- AppendMode
+	- ReadWriteMode
+
+A handle is essentially represents where the file is.
+
+hGetContents <handle> -> this takes a handle and gets the content of the file.k
+
+hClose -> closes the handle, should be used after use.
+
+withFile <string of file path> <I/O Mode> <handle function e.g \handle -> ..> -> this does the same things as above but is more consice and does not require explicitly closing the handle
+
+hGetLine, hPutStr, hPutStrLn, hGetChar - all work normally. But you use the handle as the first arguement.
+
+readFile <string path to file> -> reads the file use <- to get the contents of the file
+
+writeFile <string path-to-file> <string> -> writes the string into the file, this rewrites the file.
+
+appendFile <string path-to-file> <string> -> appends the string onto the end of the file.
+
+hSetBuffering <handle> <BufferMode> -> this changes how much the file associated with the handle is read at a time, the bufferMode is just a type synonym of
+
+NoBuffering | LineBuffering | BlockBuffering (Just <int>)
+
+hFlush <handle> -> flushes the handle.
+
+MORE FILES
+--------------------------
+
+import System.Directory
+
+openTempFile <string path-to-directory> <string filename> -> this creates a temporary file in the directory chosen. This returns a tuple of the temporary files handle and name 
+
+	(tempName, tempHandle) <- openTempFile
+
+COMMAND LINE ARGUEMENTS
+--------------------------------
+
+import System.Environment
+
+getArgs -> gets all args input to the program
+getProgName -> returns the program name
+
+RANDOMNESS
+----------------------------
+
+import System.Random
+
+random :: (RandomGen g, RandomGen a) => g -> (a, g)
+
+RandomGen is a typeclass for types that can be randomized like integers
+
+mkStdGen <int> -> takes an int and returns an integer generator 
+
+to use random, do this
+
+random $ mkStdGen 100 :: (Int, StdGen)
+this returns
+(random integer, integer generator)
+
+You can also use (Float/Bool/Integer, StdGen)
+
+randoms <StdGen> -> will return an infinite list of random values
+
+randomR (lower, upper) <StdGen> -> returns a random value from values of lower to upper.
+
+randomRs (lower, upper) <StdGen> -> same thing as above but returns an infinite list
+
+MOST OF THESE RANDOM FUNCTIONS RETURN (RANDOM_NUM, GENERATOR)
+
+getStdGen -> gets a random generator from the users computer.
+
+newStdGen -> generate a new generator 
+
+reads instead of read as reads generates an [] if fails to read
+
+BYTESTRINGS
+--------------------
 
 
