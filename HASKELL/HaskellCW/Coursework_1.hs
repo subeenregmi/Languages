@@ -145,7 +145,8 @@ dialogue g (Choice s sd) =
   in do putStrLn s
         printChoices 1 sd
         userChoice <- getLine
-		
+
+
      
                               
 
