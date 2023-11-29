@@ -1,4 +1,4 @@
-
+import qualified Data.List as L
 ------------------------- Merge sort
 
 merge :: Ord a => [a] -> [a] -> [a]
@@ -72,30 +72,38 @@ disconnect x y (z:zs)
 
 add :: Party -> Event
 add [] g = g
-add (x:xs) (Game m n p ps)
-    | x `elem` p    = add xs (Game m n p ps)
-    | otherwise     = add xs (Game m n (merge [x] p) ps)
+add (x:xs) (Game m n p ps) = add xs (Game m n (merge [x] p) ps)
 
 addAt :: Node -> Party -> Event
 addAt _ [] g = g
-addAt node party (Game m n p ps)
-    | node == 0 = Game m n p (merge ps party)
-    | otherwise = addAt (node-1) party (Game m n p (addSpace ps))
+addAt node party (Game m n p ps) = Game m n p (newPs ps node party) 
   where
-    addSpace ps
-
+    newPs [] node party = (take (node) $ repeat([])) ++ [party]
+    newPs (x:xs) node party
+        | node == 0 = (merge party x) : xs
+        | otherwise = x : newPs xs (node-1) party
 
 addHere :: Party -> Event
-addHere = undefined
+addHere party (Game m n p ps) = addAt n party (Game m n p ps)
 
 remove :: Party -> Event
-remove = undefined
+remove [] g = g
+remove (x:xs) (Game m n p ps) = remove xs (Game m n (L.delete x p) ps)
 
 removeAt :: Node -> Party -> Event
-removeAt = undefined
+removeAt _ [] g = g
+removeAt node party (Game m n p ps) = Game m n p (newPs ps node party)
+  where
+    newPs [] node party = []
+    newPs (x:xs) node party
+        | node == 0 = (deleter party x) : xs
+        | otherwise = x : newPs xs (node-1) party
+      where
+        deleter []     y = y
+        deleter (x:xs) y = deleter xs (L.delete x y)
 
 removeHere :: Party -> Event
-removeHere = undefined
+removeHere party (Game m n p ps) = removeAt n party (Game m n p ps)
 
 
 ------------------------- Assignment 2: Dialogues
@@ -122,7 +130,24 @@ testDialogue = Branch ( isAtZero )
 
 
 dialogue :: Game -> Dialogue -> IO Game
-dialogue = undefined
+dialogue (Game m n p ps) (Action s e) = do putStrLn s
+                                           return (Game m n p ps)
+
+dialogue g (Branch condition d1 d2)
+    | condition g = dialogue g d1
+    | otherwise   = dialogue g d2
+
+dialogue g (Choice s sd) = 
+  let printChoices :: Int -> [(String, Dialogue)] -> IO ()
+      printChoices [] = putStrLn ">>"
+      printChoices i (x:xs) = putStrLn (show i ++ fst x)
+                              printChoices (i+1) xs
+  in do putStrLn s
+        printChoices 1 sd
+        userChoice <- getLine
+		
+     
+                              
 
 findDialogue :: Party -> Dialogue
 findDialogue = undefined
