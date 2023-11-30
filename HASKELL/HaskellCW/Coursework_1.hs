@@ -151,11 +151,18 @@ dialogue g (Choice s sd) =
   do putStrLn s
      putStr(genChoices 1 sd)
      userChoice <- getLine
-     let x = read userChoice :: Int
-     dialogue g (snd (sd !! (x-1)))
+     if userChoice == "0" 
+        then return g 
+        else do let x = reads userChoice :: [(Int, String)]
+                if rangeCheck x
+                   then  dialogue g (snd (sd !! ((fst $ x !! 0)-1)))
+                   else  dialogue g (Choice s sd) 
   where
      genChoices _ []     = (">> ")
      genChoices i (x:xs) = "  " ++ show i++ ". " ++ fst x ++ "\n" ++ genChoices (i+1) xs
+     rangeCheck x = if null x
+                       then False
+                       else (1 <= (fst $ x !! 0)) && ((fst $ x !! 0) <= length sd)
 
 findDialogue :: Party -> Dialogue
 findDialogue p = findDiaIn p theDialogues 
@@ -171,7 +178,7 @@ findDialogue p = findDiaIn p theDialogues
 
 step :: Game -> IO Game
 step Over = return Over
-step g = 
+step g@(Game m n p ps) = 
   do  
     let (menuStr, locations, people) = displayMenu g
     putStr (menuStr)
@@ -179,15 +186,14 @@ step g =
     let choiceL = filter (\x -> x /= " ") $ L.groupBy (\x y -> x /= ' ' && y /= ' ') choice
     let choiceLen = length choiceL
     let validChoice = isAllNumbers choiceL
-    putStrLn (show choiceL)
-    putStrLn (show locations)
-    putStrLn (show people)
-    if choiceLen == 0 || not validChoice 
-      then return g
-      else
-        let intChoices = map (read) choiceL :: [Int]
-            d = (handleChoice intChoices (locations, people))
-        in dialogue g d
+    if choiceL == ["0"]
+       then step Over
+       else if choiceLen == 0 || not validChoice 
+              then return g
+              else
+                let intChoices = map (read) choiceL :: [Int]
+                    d = (handleChoice intChoices (locations, people))
+                in dialogue g d
 
   where
     changeLocation :: Node -> Event
@@ -201,7 +207,7 @@ step g =
         first = choices !! 0
         locationRangeCheck = (first >= 1) && (first <= length l)
         partyRangeCheck = L.all (\x -> (x > length l) && (x <= length l + length p)) choices
-        locationToIndex i = -TODO-
+        locationToIndex i = M.fromJust $ L.elemIndex (l !! (i-1)) theLocations
 
     isAllNumbers [] = True
     isAllNumbers (x:xs)
@@ -213,8 +219,10 @@ step g =
 
     getTravelLocations :: Node -> Map -> [Location]
     getTravelLocations _ [] = []
-    getTravelLocations n ((x,y):xs) = merge [theLocations !! x, theLocations !! y] (getTravelLocations n xs) L.\\ [theLocations !! n]
-
+    getTravelLocations n ((x,y):xs) = 
+      if x == n || y == n
+         then merge [theLocations !! x, theLocations !! y] (getTravelLocations n xs) L.\\ [theLocations !! n]
+         else getTravelLocations n xs
 
     getPartyAtNode n ps
         | n >= length ps = []
@@ -240,8 +248,7 @@ step g =
       in (currentLocation ++ locsp ++ party ++ seeablep ++ endp, locs, p++seeable)
 
 game :: IO ()
-game = do putStrLn ("Starting game...")
-          loop start
+game = do loop start
           return ()
        where
           loop g = do x <- step g
