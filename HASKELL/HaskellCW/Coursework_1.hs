@@ -1,4 +1,5 @@
 import qualified Data.List as L
+import qualified Data.Maybe as M
 ------------------------- Merge sort
 
 merge :: Ord a => [a] -> [a] -> [a]
@@ -71,10 +72,12 @@ disconnect x y (z:zs)
     | otherwise            = z:disconnect x y zs
 
 add :: Party -> Event
+add _ Over = Over
 add [] g = g
 add (x:xs) (Game m n p ps) = add xs (Game m n (merge [x] p) ps)
 
 addAt :: Node -> Party -> Event
+addAt _ _ Over = Over
 addAt _ [] g = g
 addAt node party (Game m n p ps) = Game m n p (newPs ps node party) 
   where
@@ -87,10 +90,12 @@ addHere :: Party -> Event
 addHere party (Game m n p ps) = addAt n party (Game m n p ps)
 
 remove :: Party -> Event
+remove _ Over = Over
 remove [] g = g
 remove (x:xs) (Game m n p ps) = remove xs (Game m n (L.delete x p) ps)
 
 removeAt :: Node -> Party -> Event
+removeAt _ _ Over = Over
 removeAt _ [] g = g
 removeAt node party (Game m n p ps) = Game m n p (newPs ps node party)
   where
@@ -130,39 +135,120 @@ testDialogue = Branch ( isAtZero )
 
 
 dialogue :: Game -> Dialogue -> IO Game
-dialogue (Game m n p ps) (Action s e) = do putStrLn s
-                                           return (Game m n p ps)
+
+dialogue g (Action s e) = do putStrLn s
+                             return $ e g
 
 dialogue g (Branch condition d1 d2)
     | condition g = dialogue g d1
     | otherwise   = dialogue g d2
 
+dialogue g (Choice s []) =
+  do putStrLn s
+     return g
+
 dialogue g (Choice s sd) = 
-  let printChoices :: Int -> [(String, Dialogue)] -> IO ()
-      printChoices [] = putStrLn ">>"
-      printChoices i (x:xs) = putStrLn (show i ++ fst x)
-                              printChoices (i+1) xs
-  in do putStrLn s
-        printChoices 1 sd
-        userChoice <- getLine
-
-
-     
-                              
+  do putStrLn s
+     putStr(genChoices 1 sd)
+     userChoice <- getLine
+     let x = read userChoice :: Int
+     dialogue g (snd (sd !! (x-1)))
+  where
+     genChoices _ []     = (">> ")
+     genChoices i (x:xs) = "  " ++ show i++ ". " ++ fst x ++ "\n" ++ genChoices (i+1) xs
 
 findDialogue :: Party -> Dialogue
-findDialogue = undefined
+findDialogue p = findDiaIn p theDialogues 
+  where
+    findDiaIn _ [] = Choice "There is nothing we can do." []
+    findDiaIn p (x:xs)
+        | fst x == msort p = snd x
+        | otherwise  = findDiaIn p xs
 
 
 
 ------------------------- Assignment 3: The game loop
 
 step :: Game -> IO Game
-step = undefined
+step Over = return Over
+step g = 
+  do  
+    let (menuStr, locations, people) = displayMenu g
+    putStr (menuStr)
+    choice <- getLine
+    let choiceL = filter (\x -> x /= " ") $ L.groupBy (\x y -> x /= ' ' && y /= ' ') choice
+    let choiceLen = length choiceL
+    let validChoice = isAllNumbers choiceL
+    putStrLn (show choiceL)
+    putStrLn (show locations)
+    putStrLn (show people)
+    if choiceLen == 0 || not validChoice 
+      then return g
+      else
+        let intChoices = map (read) choiceL :: [Int]
+            d = (handleChoice intChoices (locations, people))
+        in dialogue g d
+
+  where
+    changeLocation :: Node -> Event
+    changeLocation newN (Game m n p ps) = Game m newN p ps
+
+    handleChoice choices (l, p)
+        | length choices == 1 && locationRangeCheck = Action "" (changeLocation (locationToIndex first))
+        | partyRangeCheck = findDialogue $ map (\x -> p !! (x - 1 - length l)) (choices)
+        | otherwise       = Choice "" [] 
+      where
+        first = choices !! 0
+        locationRangeCheck = (first >= 1) && (first <= length l)
+        partyRangeCheck = L.all (\x -> (x > length l) && (x <= length l + length p)) choices
+        locationToIndex i = -TODO-
+
+    isAllNumbers [] = True
+    isAllNumbers (x:xs)
+        | null evaluated                   = False
+        | not.null $ snd $ evaluated !! 0  = False
+        | otherwise                        = True && isAllNumbers xs
+      where
+        evaluated = reads x :: [(Int, String)]
+
+    getTravelLocations :: Node -> Map -> [Location]
+    getTravelLocations _ [] = []
+    getTravelLocations n ((x,y):xs) = merge [theLocations !! x, theLocations !! y] (getTravelLocations n xs) L.\\ [theLocations !! n]
+
+
+    getPartyAtNode n ps
+        | n >= length ps = []
+        | otherwise      = ps !! n
+
+    indexList _ [] = ""
+    indexList i (x:xs) = " " ++ show i ++ ". " ++ x ++ "\n" ++ indexList (i+1) (xs)
+
+    displayMenu (Game m n p ps) =
+      let currentLocation = "You are in " ++ (theDescriptions !! n) ++ "\n"          
+          locs = (getTravelLocations n m)
+          locsp = if null locs
+                    then ""
+                    else "You can travel to:\n" ++ indexList 1 locs
+          party = if null p
+                    then ""
+                    else "With you are:\n" ++ indexList (1+length locs) p
+          seeable = getPartyAtNode n ps
+          seeablep = if null seeable 
+                      then ""
+                      else "You can see:\n" ++ indexList (1+length locs + length p) seeable
+          endp = "What will you do?\n>> "
+      in (currentLocation ++ locsp ++ party ++ seeablep ++ endp, locs, p++seeable)
 
 game :: IO ()
-game = undefined
-
+game = do putStrLn ("Starting game...")
+          loop start
+          return ()
+       where
+          loop g = do x <- step g
+                      y <- step Over
+                      if x == y
+                         then return ()
+                         else loop x  
 ------------------------- Assignment 4: Safety upgrades
 
 
@@ -247,12 +333,16 @@ theDialogues :: [(Party,Dialogue)]
 theDialogues = let
   always _ = True
   end str  = Choice str []
-  here        (Game _ n _ _ ) = n
+  isconn  _ _  Over           = False
   isconn  i j (Game m _ _ _ ) = elem i (connected m j)
-  isAt    n c (Game _ _ _ ps) = elem c (ps !! n)
+  here         Over           = 0
+  here        (Game _ n _ _ ) = n
+  inParty   _  Over           = False
   inParty   c (Game _ _ p _ ) = elem c p
+  isAt    _ _  Over           = False
+  isAt    n c (Game _ _ _ ps) = elem c (ps !! n)
+  updateMap _  Over           = Over
   updateMap f (Game m n p ps) = Game (f m) n p ps
-  updateMap _ Over = Over
  in
   [ ( ["Russell"] , Choice "Russell: Let's go on an adventure!"
       [ ("Sure." , end "You pack your bags and go with Russell.")
@@ -307,7 +397,7 @@ theDialogues = let
         ]
       ) (end "Howard: We need to find Curry. He'll know the way.")
     ) )
-  , ( ["Jean-Yves Girard"] , Branch (isconn 4 5) (Action "Raised on a large platform in the centre of the temple, Girard is preaching the Linearity Gospel. He seems in some sort of trance, so it is hard to make sense of, but you do pick up some interesting snippets. `Never Throw Anything Away' - you gather they must be environmentalists - `We Will Solve Church's Problems', `Only This Place Matters'... Perhaps, while he is speaking, now is a good time to take a peek behind the temple..." (updateMap (connect 4 5) )) (end "You have seen enough here.")
+  , ( ["Jean-Yves Girard"] , Branch (isconn 4 5)  (end "You have seen enough here.") (Action "Raised on a large platform in the centre of the temple, Girard is preaching the Linearity Gospel. He seems in some sort of trance, so it is hard to make sense of, but you do pick up some interesting snippets. `Never Throw Anything Away' - you gather they must be environmentalists - `We Will Solve Church's Problems', `Only This Place Matters'... Perhaps, while he is speaking, now is a good time to take a peek behind the temple..." (updateMap (connect 4 5) ))
     )
   , ( ["Vending machine"] , Choice "The walls of the Temple of Linearity are lined with vending machines. Your curiosity gets the better of you, and you inspect one up close. It sells the following items:"
       [ ( "Broccoli"  , end "You don't like broccoli." )
