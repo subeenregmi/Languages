@@ -1,5 +1,6 @@
 import qualified Data.List as L
 import qualified Data.Maybe as M
+import qualified Data.Map as Map
 ------------------------- Merge sort
 
 merge :: Ord a => [a] -> [a] -> [a]
@@ -46,17 +47,19 @@ connected (y:ys) x
     | second == x = first : connected ys x
     | otherwise   = connected ys x
   where 
-    second = snd y
     first  = fst y
+    second = snd y
 
 connect :: Node -> Node -> Map -> Map
-connect x y [] = if x < y then [(x, y)] else [(y, x)]
+connect x y [] = if x < y 
+                    then [(x, y)] 
+                    else [(y, x)]
 connect x y (z:zs)
     | x == y                        = error "Cannot connect same nodes together"
-    | (x, y) == z || (y, x) == z    = z:zs
-    | x < y && greaterThan z (x, y) = (x, y):z:zs              
-    | x > y && greaterThan z (y, x) = (y, x):z:zs              
-    | otherwise                     = z:connect x y zs
+    | (x, y) == z || (y, x) == z    = z : zs
+    | x < y && greaterThan z (x, y) = (x, y) : z : zs              
+    | x > y && greaterThan z (y, x) = (y, x) : z : zs              
+    | otherwise                     = z : connect x y zs
   where
     greaterThan :: (Node, Node) -> (Node, Node) -> Bool
     greaterThan (z, f) (x, y)
@@ -67,21 +70,24 @@ connect x y (z:zs)
 disconnect :: Node -> Node -> Map -> Map
 disconnect x y [] = []
 disconnect x y (z:zs)
-    | x < y && (x, y) == z = zs
-    | x > y && (y, x) == z = zs
-    | otherwise            = z:disconnect x y zs
+    | x < y && ((x, y) == z) = zs
+    | x > y && ((y, x) == z) = zs
+    | otherwise              = z : disconnect x y zs
 
 add :: Party -> Event
-add _ Over = Over
-add [] g = g
-add (x:xs) (Game m n p ps) = add xs (Game m n (merge [x] p) ps)
+add _ Over                 = Over
+add [] g                   = g
+add (x:xs) (Game m n p ps) = add xs $ Game m n (merge [x] p) ps
 
 addAt :: Node -> Party -> Event
-addAt _ _ Over = Over
-addAt _ [] g = g
+addAt _ _ Over                   = Over
+addAt _ [] g                     = g
 addAt node party (Game m n p ps) = Game m n p (newPs ps node party) 
   where
-    newPs [] node party = (take (node) $ repeat([])) ++ [party]
+    newPs :: [Party] -> Node -> Party -> [Party]
+    newPs [] node party = (take (node) $ repeat([])) ++ [party] 
+    -- the above is for when specifying when n is a location which you haven't been to
+    -- thus the brackets in ps haven't been generated
     newPs (x:xs) node party
         | node == 0 = (merge party x) : xs
         | otherwise = x : newPs xs (node-1) party
@@ -90,8 +96,8 @@ addHere :: Party -> Event
 addHere party (Game m n p ps) = addAt n party (Game m n p ps)
 
 remove :: Party -> Event
-remove _ Over = Over
-remove [] g = g
+remove _ Over                 = Over
+remove [] g                   = g
 remove (x:xs) (Game m n p ps) = remove xs (Game m n (L.delete x p) ps)
 
 removeAt :: Node -> Party -> Event
@@ -99,13 +105,15 @@ removeAt _ _ Over = Over
 removeAt _ [] g = g
 removeAt node party (Game m n p ps) = Game m n p (newPs ps node party)
   where
+    deleteCharacter []     y = y
+    deleteCharacter (x:xs) y = deleteCharacter xs (L.delete x y)
+
+-- TODO: comment and clear up code
     newPs [] node party = []
     newPs (x:xs) node party
-        | node == 0 = (deleter party x) : xs
+        | node == 0 = (deleteCharacter party x) : xs
         | otherwise = x : newPs xs (node-1) party
-      where
-        deleter []     y = y
-        deleter (x:xs) y = deleter xs (L.delete x y)
+
 
 removeHere :: Party -> Event
 removeHere party (Game m n p ps) = removeAt n party (Game m n p ps)
@@ -151,18 +159,21 @@ dialogue g (Choice s sd) =
   do putStrLn s
      putStr(genChoices 1 sd)
      userChoice <- getLine
-     if userChoice == "0" 
+     if userChoice == "0" --(4a)
         then return g 
         else do let x = reads userChoice :: [(Int, String)]
                 if rangeCheck x
-                   then  dialogue g (snd (sd !! ((fst $ x !! 0)-1)))
-                   else  dialogue g (Choice s sd) 
+                   then dialogue g (getChoiceFromIndex x)
+                   else dialogue g (Choice s sd) 
   where
      genChoices _ []     = (">> ")
-     genChoices i (x:xs) = "  " ++ show i++ ". " ++ fst x ++ "\n" ++ genChoices (i+1) xs
+     genChoices i (x:xs) = "  " ++ show i ++ ". " ++ fst x ++ "\n" ++ genChoices (i+1) xs
+
      rangeCheck x = if null x
                        then False
                        else (1 <= (fst $ x !! 0)) && ((fst $ x !! 0) <= length sd)
+
+     getChoiceFromIndex x = snd (sd !! ((fst $ x !! 0) - 1))
 
 findDialogue :: Party -> Dialogue
 findDialogue p = findDiaIn p theDialogues 
@@ -170,7 +181,7 @@ findDialogue p = findDiaIn p theDialogues
     findDiaIn _ [] = Choice "There is nothing we can do." []
     findDiaIn p (x:xs)
         | fst x == msort p = snd x
-        | otherwise  = findDiaIn p xs
+        | otherwise        = findDiaIn p xs
 
 
 
@@ -183,31 +194,35 @@ step g@(Game m n p ps) =
     let (menuStr, locations, people) = displayMenu g
     putStr (menuStr)
     choice <- getLine
-    let choiceL = filter (\x -> x /= " ") $ L.groupBy (\x y -> x /= ' ' && y /= ' ') choice
-    let choiceLen = length choiceL
-    let validChoice = isAllNumbers choiceL
-    if choiceL == ["0"]
+
+    let choiceList = turnInputToChoiceList choice
+        choiceLength = length choiceList
+        validChoices = isAllNumbers choiceList
+
+    if choiceList == ["0"] -- (4b)
        then step Over
-       else if choiceLen == 0 || not validChoice 
-              then return g
-              else
-                let intChoices = map (read) choiceL :: [Int]
-                    d = (handleChoice intChoices (locations, people))
-                in dialogue g d
+       else if choiceLength == 0 || not validChoices
+               then return g
+               else let convertedChoices = map (read) choiceList :: [Int]
+                        d = handleChoice convertedChoices (locations, people)
+                    in dialogue g d
 
   where
+    turnInputToChoiceList x = filter (\x -> x /= " ") $ L.groupBy (\x y -> x /= ' ' && y /= ' ') x
+
     changeLocation :: Node -> Event
     changeLocation newN (Game m n p ps) = Game m newN p ps
 
     handleChoice choices (l, p)
-        | length choices == 1 && locationRangeCheck = Action "" (changeLocation (locationToIndex first))
-        | partyRangeCheck = findDialogue $ map (\x -> p !! (x - 1 - length l)) (choices)
-        | otherwise       = Choice "" [] 
+        | length choices == 1 && locationRangeCheck = Action "" (changeLocation (locationToIndex firstChoice))
+        | partyRangeCheck                           = findDialogue $ map (indexToName) (choices)
+        | otherwise                                 = Choice "" [] 
       where
-        first = choices !! 0
-        locationRangeCheck = (first >= 1) && (first <= length l)
+        firstChoice = choices !! 0
+        locationRangeCheck = (firstChoice >= 1) && (firstChoice <= length l)
         partyRangeCheck = L.all (\x -> (x > length l) && (x <= length l + length p)) choices
         locationToIndex i = M.fromJust $ L.elemIndex (l !! (i-1)) theLocations
+        indexToName i = p !! (i - 1 - length l)
 
     isAllNumbers [] = True
     isAllNumbers (x:xs)
@@ -233,19 +248,22 @@ step g@(Game m n p ps) =
 
     displayMenu (Game m n p ps) =
       let currentLocation = "You are in " ++ (theDescriptions !! n) ++ "\n"          
-          locs = (getTravelLocations n m)
-          locsp = if null locs
-                    then ""
-                    else "You can travel to:\n" ++ indexList 1 locs
-          party = if null p
-                    then ""
-                    else "With you are:\n" ++ indexList (1+length locs) p
+
+          locations = getTravelLocations n m
+          locationPhrase = if null locations
+                               then ""
+                               else "You can travel to:\n" ++ indexList 1 locations
+
+          partyPhrase = if null p
+                           then ""
+                           else "With you are:\n" ++ indexList (1+ length locations) p
+
           seeable = getPartyAtNode n ps
-          seeablep = if null seeable 
-                      then ""
-                      else "You can see:\n" ++ indexList (1+length locs + length p) seeable
-          endp = "What will you do?\n>> "
-      in (currentLocation ++ locsp ++ party ++ seeablep ++ endp, locs, p++seeable)
+          seeablePhrase = if null seeable 
+                             then ""
+                             else "You can see:\n" ++ indexList (1+length locations + length p) seeable
+          endPhrase = "What will you do?\n>> "
+      in (currentLocation ++ locationPhrase ++ partyPhrase ++ seeablePhrase ++ endPhrase, locations, p++seeable)
 
 game :: IO ()
 game = do loop start
@@ -257,6 +275,10 @@ game = do loop start
                          then return ()
                          else loop x  
 ------------------------- Assignment 4: Safety upgrades
+{- 4a) Line 162
+ - 4b) Line 197
+ - 4c) 
+ -}
 
 
 ------------------------- Assignment 5: Solving the game
@@ -266,14 +288,35 @@ data Command  = Travel [Int] | Select Party | Talk [Int]
 
 type Solution = [Command]
 
-talk ::Game -> Dialogue -> [(Game,[Int])]
-talk = undefined
+talk :: Game -> Dialogue -> [(Game,[Int])]
+talk g (Branch condition d1 d2) = if condition g
+                                     then talk g d1
+                                     else talk g d2
+
+talk g (Action _ _) = []
+talk g (Choice _ []) = []
+
+talk g (Choice _ p) = traverse g (getList p) (Choice "" p) []
+  where
+    getList x = take (length x) [1..]
+    getIndex elem list = (M.fromJust $ L.elemIndex (elem) (list)) + 1
+
+    traverse g (x:xs) (Action _ e) steps       = [(e g, steps)]
+
+    traverse g (x:xs) (Branch con d1 d2) steps = if con g 
+                                                    then traverse g (xs) d1 (steps ++ [x])
+                                                    else traverse g (xs) d2 (steps ++ [x])
+
+    traverse g _ (Choice _ []) steps           = []
+    traverse g [] _ _ = []
+    traverse g (x:xs) (Choice _ (p:ps)) steps  = 
+        traverse g (getList (p:ps)) (snd p) (steps ++ [x]) ++ traverse g xs (Choice "" ps) steps
 
 select :: Game -> [Party]
-select = undefined
+select (Game m n p ps) = L.subsequences (p ++ (ps !! n))
 
 travel :: Map -> Node -> [(Node,[Int])]
-travel = undefined
+travel m n = undefined
 
 allSteps :: Game -> [(Solution,Game)]
 allSteps = undefined
