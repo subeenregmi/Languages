@@ -37,7 +37,6 @@ type Event     = Game -> Game
 testGame :: Node -> Game
 testGame i = Game [(0,1)] i ["Russell"] [[],["Brouwer","Heyting"]]
 
-
 ------------------------- Assignment 1: The game world
 
 connected :: Map -> Node -> [Node]
@@ -114,10 +113,8 @@ removeAt node party (Game m n p ps) = Game m n p (newPs ps node party)
         | node == 0 = (deleteCharacter party x) : xs
         | otherwise = x : newPs xs (node-1) party
 
-
 removeHere :: Party -> Event
 removeHere party (Game m n p ps) = removeAt n party (Game m n p ps)
-
 
 ------------------------- Assignment 2: Dialogues
 
@@ -141,7 +138,6 @@ testDialogue = Branch ( isAtZero )
  where
   isAtZero (Game _ n _ _) = n == 0
 
-
 dialogue :: Game -> Dialogue -> IO Game
 
 dialogue g (Action s e) = do putStrLn s
@@ -161,7 +157,7 @@ dialogue g (Choice s sd) =
      userChoice <- getLine
      if userChoice == "0" --(4a)
         then return g 
-        else do let x = reads userChoice :: [(Int, String)]
+        else do let x = reads userChoice :: [(Int, String)] -- (4c)
                 if rangeCheck x
                    then dialogue g (getChoiceFromIndex x)
                    else dialogue g (Choice s sd) 
@@ -190,24 +186,25 @@ findDialogue p = findDiaIn p theDialogues
 step :: Game -> IO Game
 step Over = return Over
 step g@(Game m n p ps) = 
-  do  
-    let (menuStr, locations, people) = displayMenu g
-    putStr (menuStr)
-    choice <- getLine
+  do let (menuStr, locations, people) = displayMenu g
+     putStr (menuStr)
+     choice <- getLine
 
-    let choiceList = turnInputToChoiceList choice
-        choiceLength = length choiceList
-        validChoices = isAllNumbers choiceList
+     let choiceList = turnInputToChoiceList choice -- (4c)
+         choiceLength = length choiceList
+         validChoices = isAllNumbers choiceList
 
-    if choiceList == ["0"] -- (4b)
-       then step Over
-       else if choiceLength == 0 || not validChoices
-               then return g
-               else let convertedChoices = map (read) choiceList :: [Int]
-                        d = handleChoice convertedChoices (locations, people)
-                    in dialogue g d
+     if choiceList == ["0"] -- (4b)
+        then step Over
+        else if choiceLength == 0 || not validChoices
+                then return g
+                else let convertedChoices = map (read) choiceList :: [Int]
+                         d = handleChoice convertedChoices (locations, people)
+                     in dialogue g d
 
   where
+    -- This function removes all spaces in a string and the remaining string is
+    -- split up into a list of strings that contain a single character.
     turnInputToChoiceList x = filter (\x -> x /= " ") $ L.groupBy (\x y -> x /= ' ' && y /= ' ') x
 
     changeLocation :: Node -> Event
@@ -219,8 +216,12 @@ step g@(Game m n p ps) =
         | otherwise                                 = Choice "" [] 
       where
         firstChoice = choices !! 0
+        -- This check checks if the choice is to change the location works as the locations
+        -- start to index from 1 and the people are indexed after.
         locationRangeCheck = (firstChoice >= 1) && (firstChoice <= length l)
         partyRangeCheck = L.all (\x -> (x > length l) && (x <= length l + length p)) choices
+        -- We find the character the user has chosen and finding the index in the list
+        -- 'theLocations; need to subtract 1 as list indexing starts from 1
         locationToIndex i = M.fromJust $ L.elemIndex (l !! (i-1)) theLocations
         indexToName i = p !! (i - 1 - length l)
 
@@ -236,6 +237,8 @@ step g@(Game m n p ps) =
     getTravelLocations _ [] = []
     getTravelLocations n ((x,y):xs) = 
       if x == n || y == n
+         -- use List difference here as we do not want to be able to travel to the a location
+         -- where the user is already in
          then merge [theLocations !! x, theLocations !! y] (getTravelLocations n xs) L.\\ [theLocations !! n]
          else getTravelLocations n xs
 
@@ -277,7 +280,7 @@ game = do loop start
 ------------------------- Assignment 4: Safety upgrades
 {- 4a) Line 162
  - 4b) Line 197
- - 4c) 
+ - 4c) Line 193, 160
  -}
 
 
@@ -290,17 +293,23 @@ type Solution = [Command]
 
 talk :: Game -> Dialogue -> [(Game,[Int])]
 talk Over _ = []
+-- if talk is called on branch then we can go through it without need of traversing
 talk g (Branch condition d1 d2) = if condition g
                                      then talk g d1
                                      else talk g d2
 talk g (Action _ _) = []
 talk g (Choice _ []) = []
+-- If it called on action or an empty choice, (which probably shouldnt be the case), we return nothing
 
 talk g (Choice _ p) = traverse g (getList p) (Choice "" p) []
   where
     getList x = take (length x) [1..]
     getIndex elem list = (M.fromJust $ L.elemIndex (elem) (list)) + 1
 
+    -- Essentially traverse continues down a path until it reaches either a empty choice, when
+    -- this happens we just return [], when it reaches an action we return the correct data in 
+    -- a list, after disovering all paths, we add all these results giving us all possible actions
+    -- and the steps needed to take.
     traverse g (x:xs) (Action _ e) steps       = [(e g, steps)]
 
     traverse g (x:xs) (Branch con d1 d2) steps = if con g 
@@ -317,22 +326,42 @@ select (Game m n p ps) = L.subsequences (p ++ (ps !! n))
 
 travel :: Map -> Node -> [(Node,[Int])]
 travel m n = let mapGraph = createGraph m
-             in traverse n n mapGraph [(n), []] []
+                 allPossibleRoutes = traverse n n (getConnections n mapGraph) mapGraph [(n, [])] []
+             in DMap.toList $ createShortestRoutes (allPossibleRoutes) DMap.empty 
   where
+
+    createShortestRoutes [] s          = s
+    createShortestRoutes ((y,ys):xs) s = if DMap.member y s
+                                            then if (length ys) < length (s DMap.! y)
+                                                    then createShortestRoutes xs (DMap.insert y ys s)
+                                                    else createShortestRoutes xs s
+                                            else createShortestRoutes xs (DMap.insert y ys s)
     getConnections node graph = graph DMap.! node
 
-	traverse sN cN mG d steps
-        | length d == DMap.keys mG = d
-        | otherwise                = 
-	where
-      nextNode cN d = let newSteps
+    -- d is a list of discoveredRoutes for nodes, mG a graph of the map 
+    -- steps track the input passed in to get to the currentNode,  
+    -- this works by going to the starting node, looking at its first connection, if it hasn't
+    -- been discovered previously, then go to it, if it has go to the next connection, until all
+    -- nodes have been discovered then return the possible routes.
+    traverse startingNode currentNode [] mG d steps = d
+    traverse startingNode currentNode (con:cons) mG d steps
+        | elem (con) (discoveredNodes) = traverse startingNode currentNode cons mG d steps
+        | otherwise                    = traverse startingNode con (getConnections con mG) mG (newD) (newSteps) ++ traverse startingNode currentNode cons mG d steps
+      where
+        discoveredNodes = map (fst) d
+        index           = (M.fromJust $ L.elemIndex (con) (getConnections currentNode mG))+1
+        newSteps        = steps ++ [index]
+        newD            = d ++ [(con, newSteps)]
 
-createGraph []     = DMap.empty
-createGraph (n:ns) = addToGraph n (createGraph ns)
+
+-- This map is called a graph, its keys are the nodes in a map and the values are the nodes
+-- it is connected to.
+createGraph []        = DMap.empty
+createGraph (n:ns)    = addToGraph n (createGraph ns)
 addToGraph (n1, n2) p = DMap.insertWith (merge) n2 [n1] $ DMap.insertWith (merge) n1 [n2] p
 
 allSteps :: Game -> [(Solution,Game)]
-allSteps = undefined
+allSteps (Game m n p ps) = 
 
 solve :: Game -> Solution
 solve = undefined
@@ -345,7 +374,6 @@ walkthrough = (putStrLn . unlines . filter (not . null) . map format . solve) st
     format (Select xs) = "Select: " ++ foldr1 (\x y -> x ++ ", " ++ y) xs
     format (Talk   []) = ""
     format (Talk   xs) = "Talk:   " ++ unwords (map show xs)
-
 
 ------------------------- Game data
 
