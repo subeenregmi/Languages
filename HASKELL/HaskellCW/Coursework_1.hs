@@ -1,6 +1,6 @@
 import qualified Data.List as L
 import qualified Data.Maybe as M
-import qualified Data.Map as Map
+import qualified Data.Map as DMap
 ------------------------- Merge sort
 
 merge :: Ord a => [a] -> [a] -> [a]
@@ -289,10 +289,10 @@ data Command  = Travel [Int] | Select Party | Talk [Int]
 type Solution = [Command]
 
 talk :: Game -> Dialogue -> [(Game,[Int])]
+talk Over _ = []
 talk g (Branch condition d1 d2) = if condition g
                                      then talk g d1
                                      else talk g d2
-
 talk g (Action _ _) = []
 talk g (Choice _ []) = []
 
@@ -316,7 +316,20 @@ select :: Game -> [Party]
 select (Game m n p ps) = L.subsequences (p ++ (ps !! n))
 
 travel :: Map -> Node -> [(Node,[Int])]
-travel m n = undefined
+travel m n = let mapGraph = createGraph m
+             in traverse n n mapGraph [(n), []] []
+  where
+    getConnections node graph = graph DMap.! node
+
+	traverse sN cN mG d steps
+        | length d == DMap.keys mG = d
+        | otherwise                = 
+	where
+      nextNode cN d = let newSteps
+
+createGraph []     = DMap.empty
+createGraph (n:ns) = addToGraph n (createGraph ns)
+addToGraph (n1, n2) p = DMap.insertWith (merge) n2 [n1] $ DMap.insertWith (merge) n1 [n2] p
 
 allSteps :: Game -> [(Solution,Game)]
 allSteps = undefined
